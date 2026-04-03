@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(command -v node)",
+      "Read(//usr/local/bin/**)",
+      "Read(//usr/bin/**)",
+      "Bash(echo \"PATH: $PATH\")",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/celin/AppData/Roaming/**)",
+      "Read(//c/Users/celin/AppData/Local/**)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(cmd.exe /c \"node --version && npm --version\")",
+      "Bash(cmd.exe /c \"where node 2>&1\")",
+      "Bash(powershell.exe -Command \"Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source; Get-Command npm -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem ''C:\\\\Program Files\\\\nodejs'', ''C:\\\\Program Files \\(x86\\)\\\\nodejs'', \"\"$env:APPDATA\\\\npm\"\", \"\"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\"\" -ErrorAction SilentlyContinue | Select-Object FullName\")",
+      "Bash(\"/c/Program Files/nodejs/npm.cmd\" install)",
+      "Bash(\"/c/Program Files/nodejs/npm.cmd\" run dev)",
+      "Bash(cmd.exe /c \"set PATH=C:\\\\Program Files\\\\nodejs;%PATH% && npm run dev\")",
+      "mcp__aafc2559-4601-488c-833d-de4ede5c5ea3__use_figma",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\celin\\\\.git\")"
+    ]
+  }
+}
