@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import FreeCanvas, { buildTemplate } from '../components/canvas/FreeCanvas'
+import FreeCanvas from '../components/canvas/FreeCanvas'
 import LayoutPanel, { LAYOUT_PRESETS } from '../components/panels/LayoutPanel'
 import TextPanel from '../components/panels/TextPanel'
 import LogoPanel from '../components/panels/LogoPanel'
@@ -84,156 +84,6 @@ const SIDEBAR_TABS = [
   { id: 'template', label: 'Template',  Icon: IconTemplate },
 ]
 
-// ─── Canvas Zone Content Renderer ─────────────────────────────────────────────
-
-function ZoneContent({ items }) {
-  if (!items || items.length === 0) return null
-
-  return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3 overflow-hidden">
-      {items.map((item, idx) => {
-        if (item.type === 'text') {
-          const cls =
-            item.style === 'heading'
-              ? 'text-2xl font-bold text-gray-900'
-              : item.style === 'subheading'
-              ? 'text-base font-semibold text-gray-700'
-              : 'text-sm text-gray-600'
-          return <p key={idx} className={`${cls} text-center leading-tight`}>{item.content}</p>
-        }
-
-        if (item.type === 'logo') {
-          const logoMap = {
-            'color-1': { bg: '#2563EB', text: '#fff' },
-            'color-2': { bg: '#111827', text: '#fff' },
-            'color-3': { bg: '#BFDBFE', text: '#1D4ED8' },
-            'color-4': { bg: '#1E3A8A', text: '#fff' },
-            'bw-1':    { bg: '#fff', text: '#111827' },
-            'bw-2':    { bg: '#F3F4F6', text: '#374151' },
-          }
-          const style = logoMap[item.name] || { bg: '#2563EB', text: '#fff' }
-          return (
-            <div key={idx} className="rounded-lg px-4 py-2" style={{ backgroundColor: style.bg }}>
-              <span className="text-xl font-black italic" style={{ color: style.text }}>ipop</span>
-            </div>
-          )
-        }
-
-        if (item.type === 'widget') {
-          if (item.name === 'qr-code') {
-            return (
-              <div key={idx} className="bg-white rounded p-2 border border-gray-100">
-                <svg width="48" height="48" viewBox="0 0 7 7" shapeRendering="crispEdges">
-                  {/* QR pattern */}
-                  {[
-                    [1,1,1,0,1,1,1],[1,0,1,0,1,0,1],[1,0,1,0,1,0,1],
-                    [0,0,0,0,0,0,0],[1,0,1,0,1,0,1],[1,0,1,0,1,0,1],[1,1,1,0,1,1,1]
-                  ].map((row, r) =>
-                    row.map((cell, c) =>
-                      cell ? <rect key={`${r}-${c}`} x={c} y={r} width="1" height="1" fill="#111" /> : null
-                    )
-                  )}
-                </svg>
-              </div>
-            )
-          }
-          if (item.name === 'youtube') {
-            return (
-              <div key={idx} className="bg-red-600 rounded-lg w-14 h-10 flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <path d="M10 15l5.19-3L10 9v6z"/>
-                </svg>
-              </div>
-            )
-          }
-          if (item.name === 'date') {
-            const d = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-            return (
-              <div key={idx} className="bg-white rounded-lg border border-gray-200 px-3 py-1.5">
-                <span className="text-sm font-medium text-gray-700">{d}</span>
-              </div>
-            )
-          }
-          if (item.name === 'clock') {
-            return (
-              <div key={idx} className="bg-gray-900 rounded-lg px-3 py-1.5">
-                <span className="text-sm font-mono font-bold text-green-400 tracking-widest">00:00:00</span>
-              </div>
-            )
-          }
-        }
-
-        return null
-      })}
-    </div>
-  )
-}
-
-// ─── Canvas ───────────────────────────────────────────────────────────────────
-
-function Canvas({ layout, selectedZoneId, onSelectZone, zoneContents, bgColor }) {
-  if (!layout) return (
-    <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-      Select a layout to get started
-    </div>
-  )
-
-  return (
-    <div
-      className="w-full h-full"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: layout.gridCols,
-        gridTemplateRows: layout.gridRows,
-        gap: '2px',
-        backgroundColor: bgColor,
-      }}
-    >
-      {layout.zones.map((zone) => {
-        const isSelected = selectedZoneId === zone.id
-        const contents = zoneContents[zone.id] || []
-        const hasContent = contents.length > 0
-
-        return (
-          <div
-            key={zone.id}
-            onClick={(e) => { e.stopPropagation(); onSelectZone(zone.id) }}
-            className={`relative cursor-pointer bg-white transition-all overflow-hidden
-              ${isSelected
-                ? 'border-2 border-blue-500'
-                : 'border border-gray-200 hover:border-gray-300'
-              }`}
-            style={zone.style}
-          >
-            {/* Corner handles when selected */}
-            {isSelected && (
-              <>
-                <div className="absolute top-0 left-0 w-2.5 h-2.5 bg-blue-500 z-10" />
-                <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-blue-500 z-10" />
-                <div className="absolute bottom-0 left-0 w-2.5 h-2.5 bg-blue-500 z-10" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-blue-500 z-10" />
-              </>
-            )}
-
-            {/* Zone content */}
-            {hasContent ? (
-              <ZoneContent items={contents} />
-            ) : (
-              isSelected && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-xs text-gray-400 text-center px-2">
-                    Click a panel item to add content
-                  </span>
-                </div>
-              )
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 // ─── Right Panel ──────────────────────────────────────────────────────────────
 
 const EL_TYPE_LABEL = { rect: 'Rectangle', text: 'Text', image: 'Image', logo: 'Logo', widget: 'Widget' }
@@ -243,15 +93,15 @@ function NumInput({ value, onChange, unit }) {
   return (
     <div
       className="flex items-center gap-2"
-      style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '6px 10px 6px 8px' }}
+      style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px 8px 8px' }}
     >
       <input
         type="number"
         value={Math.round(value)}
         onChange={(e) => onChange(Number(e.target.value))}
-        style={{ width: '100%', background: 'transparent', fontSize: 14, fontWeight: 500, color: '#0A0D12', outline: 'none', border: 'none' }}
+        style={{ width: '100%', background: 'transparent', fontSize: 16, fontWeight: 500, color: '#0A0D12', outline: 'none', border: 'none' }}
       />
-      <span style={{ fontSize: 13, color: '#717680', flexShrink: 0 }}>{unit}</span>
+      <span style={{ fontSize: 16, color: '#717680', flexShrink: 0 }}>{unit}</span>
     </div>
   )
 }
@@ -319,49 +169,262 @@ function SectionHeader({ label, open, onToggle }) {
   )
 }
 
-// Track W/H input with fr | px | fill unit dropdown
-function TrackInput({ label, track, onChange }) {
-  const isFill = track.unit === 'fill'
+
+// ── Presentation panel — shared between zone and slide contexts ───────────────
+// All tokens passed in as props to avoid re-declaring DS inside the function body.
+function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setPresName, pages, setPages, DS, bodyM, bodyMMedium, bodyMMedQuart, SectionHeader }) {
+  const fieldStyle = {
+    background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
+    borderRadius: DS.radiusXl, padding: '8px 16px',
+    minHeight: 40, display: 'flex', alignItems: 'center',
+  }
+  const inputStyle = (hasValue) => ({
+    flex: 1, background: 'transparent', border: 'none', outline: 'none',
+    fontSize: 16, lineHeight: '24px', fontWeight: 400,
+    color: hasValue ? DS.fgPrimary : '#A4A7AE',
+  })
   return (
-    <div style={{ flex: 1 }}>
-      <div style={{ fontSize: 12, color: '#717680', marginBottom: 6 }}>{label}</div>
-      <div style={{ display: 'flex', gap: 4 }}>
-        <div style={{ flex: 1, background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '6px 8px', display: 'flex', alignItems: 'center' }}>
-          <input
-            type="number"
-            value={isFill ? '' : track.value}
-            disabled={isFill}
-            placeholder={isFill ? '—' : ''}
-            onChange={(e) => onChange({ ...track, value: Math.max(0.1, parseFloat(e.target.value) || 1) })}
-            style={{ width: '100%', background: 'transparent', fontSize: 13, fontWeight: 500, color: isFill ? '#A4A7AE' : '#0A0D12', outline: 'none', border: 'none' }}
-          />
-        </div>
-        <select
-          value={track.unit}
-          onChange={(e) => {
-            const u = e.target.value
-            onChange(u === 'fill' ? { value: 1, unit: 'fill' } : { value: track.unit === 'fill' ? 1 : track.value, unit: u })
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {/* Presentation Details section */}
+        <SectionHeader label="Presentation Details" open={presDetailsOpen} onToggle={() => setPresDetailsOpen(!presDetailsOpen)} />
+        {presDetailsOpen && (
+          <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <span style={{ ...bodyMMedQuart }}>Presentation Name</span>
+              <div style={fieldStyle}>
+                <input
+                  type="text" value={presName} onChange={(e) => setPresName(e.target.value)}
+                  placeholder="Untitled Presentation" style={inputStyle(presName)}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <span style={{ ...bodyMMedQuart }}>Total Duration</span>
+              <span style={{ ...bodyMMedium }}>00:00:00.0</span>
+            </div>
+          </div>
+        )}
+
+        {/* One section per page */}
+        {pages.map((page, idx) => (
+          <div key={page.id}>
+            <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ ...bodyM }}>Page {idx + 1}</span>
+              <button
+                onClick={() => setPages((prev) => { const c = [...prev]; c.splice(idx + 1, 0, { id: Date.now(), name: '', duration: '' }); return c })}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: DS.fgQuaternary, padding: 0 }}
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <span style={{ ...bodyMMedQuart }}>Page Name</span>
+                <div style={fieldStyle}>
+                  <input
+                    type="text" value={page.name}
+                    onChange={(e) => setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, name: e.target.value } : p))}
+                    placeholder={`Page ${idx + 1}`} style={inputStyle(page.name)}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <span style={{ ...bodyMMedQuart }}>Duration</span>
+                <div style={{ ...fieldStyle, height: 40 }}>
+                  <input
+                    type="text" value={page.duration}
+                    onChange={(e) => setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, duration: e.target.value } : p))}
+                    placeholder="00:00:00.0" style={inputStyle(page.duration)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add Page — pinned bottom, bg/brand full-width button */}
+      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: 20, background: DS.bgPrimary }}>
+        <button
+          onClick={() => setPages((prev) => [...prev, { id: Date.now(), name: '', duration: '' }])}
+          style={{
+            width: '100%', padding: '8px 14px',
+            background: '#1570EF', border: '1px solid #175CD3',
+            borderRadius: DS.radiusXl, cursor: 'pointer',
+            fontSize: 16, lineHeight: '24px', fontWeight: 600, color: '#FFFFFF',
+            boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)',
           }}
-          style={{ background: '#F5F5F5', border: '1px solid #D5D7DA', borderRadius: 8, fontSize: 12, color: '#414651', padding: '0 4px', cursor: 'pointer', outline: 'none' }}
-        >
-          <option value="fr">fr</option>
-          <option value="px">px</option>
-          <option value="fill">fill</option>
-        </select>
+        >Add Page</button>
       </div>
     </div>
   )
 }
 
 function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement, onDeleteElement, onBringForward, onSendBackward,
-  selectedZoneId, zoneColTrack, zoneRowTrack, zoneStyle, gridGap, onUpdateZoneColTrack, onUpdateZoneRowTrack, onUpdateZoneStyle, onUpdateGridGap }) {
-  const [rightTab, setRightTab] = useState('design')
-  const [dimsOpen, setDimsOpen] = useState(true)
-  const [bgOpen, setBgOpen]     = useState(true)
-
-  const tabs = [{ id: 'design', label: 'Design' }, { id: 'presentation', label: 'Presentation' }]
+  selectedZoneId, zoneStyle, onUpdateZoneStyle }) {
+  const [rightTab, setRightTab]             = useState('design')
+  const [dimsOpen, setDimsOpen]             = useState(true)
+  const [bgOpen, setBgOpen]                 = useState(true)
+  const [appearanceOpen, setAppearanceOpen] = useState(true)
+  const [layersOpen, setLayersOpen]         = useState(false)
+  const [presDetailsOpen, setPresDetailsOpen] = useState(true)
+  const [presName, setPresName]             = useState('')
+  const [pages, setPages]                   = useState([
+    { id: 1, name: '', duration: '' },
+  ])
 
   const panelStyle = { width: 320, borderLeft: '1px solid #E9EAEB', background: '#FFFFFF' }
+
+  // ── Design tokens ────────────────────────────────────────────────────────
+  // All values sourced from Figma local variables (Working-Prototype file)
+  const DS = {
+    bgPrimary:    '#FFFFFF',   // background/primary
+    bgPage:       '#FAFAFA',   // background/page
+    bgHover:      '#F5F5F5',   // background/primary-hover
+    borderDefault:'#E9EAEB',   // border/default
+    borderPrimary:'#D5D7DA',   // border/primary
+    fgPrimary:    '#0A0D12',   // foreground/primary
+    fgQuaternary: '#717680',   // foreground/quaternary
+    radiusXl:     10,          // border/radius/xl
+    radiusL:      8,           // border/radius/l
+    radiusSm:     4,           // border/radius/sm
+    shadow:       '0px 1px 2px 0px rgba(10,13,18,0.05)',  // shadow/xs
+  }
+
+  // Map hex → Figma color token name (for Border color display)
+  const COLOR_TOKEN = {
+    '#FFFFFF': 'Neutral/White', '#ffffff': 'Neutral/White',
+    '#F5F5F5': 'Neutral/100',  '#f5f5f5': 'Neutral/100',
+    '#E9EAEB': 'Neutral/200',  '#D5D7DA': 'Neutral/300',
+    '#0A0D12': 'Neutral/950',  '#000000': 'Neutral/Black',
+  }
+  const colorTokenName = (hex) => COLOR_TOKEN[hex] ?? COLOR_TOKEN[hex?.toUpperCase()] ?? (hex ?? '').replace('#', '').toUpperCase()
+
+  // ── Shared style objects (Body/m-medium + Body/m text styles from Figma) ──
+  const bodyMMedium = { fontSize: 16, lineHeight: '24px', fontWeight: 500, color: DS.fgPrimary }   // Body/m-medium
+  const bodyM       = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgPrimary }   // Body/m
+  const bodyMQuart  = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgQuaternary }// Body/m quaternary
+  const bodyMMedQuart = { fontSize: 16, lineHeight: '24px', fontWeight: 500, color: DS.fgQuaternary }
+
+  // Select input with shadow (bg/primary): for border color + dropdowns
+  const propInputPrimary = {
+    background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
+    borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px',
+    display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden',
+    boxShadow: DS.shadow,
+  }
+  // Native number input sitting inside a propInput box
+  const numInputInner = {
+    flex: 1, background: 'transparent', border: 'none', outline: 'none',
+    ...bodyMMedium, minWidth: 0,
+  }
+  // Icon button container (Property/Grouping/Icon Button: 24x24, p:4, radius:8)
+  const iconBtn = {
+    width: 24, height: 24, flexShrink: 0, display: 'flex',
+    alignItems: 'center', justifyContent: 'center',
+    padding: 4, borderRadius: DS.radiusL,
+  }
+  // Flat icon button (no bg) for section header actions
+  const iconBtnFlat = {
+    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+    color: DS.fgQuaternary, display: 'flex', alignItems: 'center',
+  }
+
+  // ── Inline SVG icons (matching Figma icon names) ─────────────────────────
+  // corner-radius (approximates the rounded-corner indicator icon)
+  const IconRadius = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M3 13V8C3 5.239 5.239 3 8 3H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+  // opacity / checkerboard
+  const IconOpacity = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="2" width="5" height="5" fill={DS.borderDefault}/>
+      <rect x="9" y="2" width="5" height="5" fill={DS.borderPrimary}/>
+      <rect x="2" y="9" width="5" height="5" fill={DS.borderPrimary}/>
+      <rect x="9" y="9" width="5" height="5" fill={DS.borderDefault}/>
+      <rect x="2" y="2" width="12" height="12" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.25"/>
+    </svg>
+  )
+  // eye (for Fill / Border section headers)
+  const IconEye = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M1.5 8C1.5 8 4 3.5 8 3.5C12 3.5 14.5 8 14.5 8C14.5 8 12 12.5 8 12.5C4 12.5 1.5 8 1.5 8Z" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinejoin="round"/>
+      <circle cx="8" cy="8" r="2" stroke={DS.fgQuaternary} strokeWidth="1.25"/>
+    </svg>
+  )
+  // minus (for Fill / Border section headers)
+  const IconMinus = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M3 8H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+  // align-vertical-space-around = stacked lines (border weight)
+  const IconBorderWidth = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 4H14" stroke={DS.fgQuaternary} strokeWidth="2"    strokeLinecap="round"/>
+      <path d="M2 8H14" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M2 12H14" stroke={DS.fgQuaternary} strokeWidth="0.75" strokeLinecap="round"/>
+    </svg>
+  )
+  // chevron-down (for dropdowns, 20px viewBox to match Figma)
+  const IconChevronDown = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M5 8l5 5 5-5" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+  // minus icon (small, for Solid border style option)
+  const IconMinusSm = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M4 10H16" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+  // square icon (small, for All sides option)
+  const IconSquareSm = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <rect x="3" y="3" width="14" height="14" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.5"/>
+    </svg>
+  )
+
+  // Styled select dropdown matching Figma "Select" component
+  // (border/primary, radius/xl, shadow/xs, appearance:none + custom chevron)
+  function StyledSelect({ value, onChange, options, leadingIcon, style: extraStyle }) {
+    return (
+      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', ...propInputPrimary, padding: '8px 14px', ...extraStyle }}>
+        {leadingIcon && <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', marginRight: 2 }}>{leadingIcon}</span>}
+        <select
+          value={value}
+          onChange={onChange}
+          style={{
+            flex: 1, appearance: 'none', background: 'transparent', border: 'none', outline: 'none',
+            ...bodyMMedium, paddingRight: 16, cursor: 'pointer', minWidth: 0,
+          }}
+        >
+          {options.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+        </select>
+        <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
+          <IconChevronDown />
+        </span>
+      </div>
+    )
+  }
+
+  // Section header for Fill / Border: label on left, eye + minus on right
+  function FillBorderHeader({ label }) {
+    return (
+      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={bodyM}>{label}</span>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <button style={iconBtnFlat}><IconEye /></button>
+          <button style={iconBtnFlat}><IconMinus /></button>
+        </div>
+      </div>
+    )
+  }
 
   // ── Element properties panel (shown when an element is selected) ──────────
   if (selectedElement) {
@@ -478,46 +541,180 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
 
   // ── Zone properties panel ────────────────────────────────────────────────
   if (selectedZoneId && !selectedElement) {
+    const fill        = zoneStyle.fill          ?? '#F5F5F5'
+    const fillOpacity = zoneStyle.fillOpacity   ?? 100
+    const opacity     = zoneStyle.opacity       ?? 100
+    const radius      = zoneStyle.borderRadius  ?? 0
+    const bColor      = zoneStyle.borderColor   ?? '#FFFFFF'
+    const bPos        = zoneStyle.borderPosition ?? 'inside'
+    const bWidth      = zoneStyle.borderWidth   ?? 1
+    const bStyle      = zoneStyle.borderStyle   ?? 'solid'
+    const bSides      = zoneStyle.borderSides   ?? 'all'
+
+    // Row layout: 70px Body/m-medium quaternary label + flex-1 input
+    const Row = ({ label, children }) => (
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%', minWidth: 0 }}>
+        <span style={{ width: 70, flexShrink: 0, ...bodyMMedQuart }}>{label}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      </div>
+    )
+
     return (
       <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
-        {/* Header */}
-        <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #E9EAEB' }}>
-          <div style={{ fontSize: 13, color: '#717680', marginBottom: 2 }}>Selected</div>
-          <div style={{ fontSize: 16, fontWeight: 500, color: '#0A0D12' }}>Zone</div>
+
+        {/* ── Tab bar: Design / Presentation ─────────────────────────────
+            Figma: .navDropdown — px:20 pb:20 pt:20, border-bottom, two PanelTabs flex-1
+            PanelTabs selected: bg/primary-hover, radius/xl, px:10 py:6, Body/m-medium     */}
+        <div style={{ padding: '20px 20px 20px', borderBottom: `1px solid ${DS.borderDefault}` }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[['design', 'Design'], ['presentation', 'Presentation']].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setRightTab(id)}
+                style={{
+                  flex: 1, padding: '6px 10px', borderRadius: DS.radiusXl,
+                  border: 'none', cursor: 'pointer',
+                  background: rightTab === id ? DS.bgHover : 'transparent',
+                  ...bodyMMedium,
+                  color: rightTab === id ? DS.fgPrimary : DS.fgQuaternary,
+                }}
+              >{label}</button>
+            ))}
+          </div>
         </div>
 
-        {/* W / H with unit */}
-        <SectionHeader label="Size" open={true} onToggle={() => {}} />
-        <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>
-          <TrackInput label="W" track={zoneColTrack} onChange={onUpdateZoneColTrack} />
-          <TrackInput label="H" track={zoneRowTrack} onChange={onUpdateZoneRowTrack} />
-        </div>
+        {rightTab === 'design' && (<>
 
-        {/* Gap */}
-        <SectionHeader label="Gap" open={true} onToggle={() => {}} />
-        <div style={{ padding: '0 20px 16px' }}>
-          <NumInput value={gridGap} onChange={(v) => onUpdateGridGap(Math.max(0, v))} unit="px" />
-        </div>
+          {/* ── Appearance ─────────────────────────────────────────────────
+              Figma: Property/Grouping/Dropdown — border-top/default, px:20 py:12, gap:12
+              Content: pb:20 px:20, gap:8 between rows                                    */}
+          <SectionHeader label="Appearance" open={appearanceOpen} onToggle={() => setAppearanceOpen(!appearanceOpen)} />
+          {appearanceOpen && (
+            <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {/* Radius — Property component: bg/page, border/primary, radius/xl, pl:8 pr:14 py:8
+                  Icon button inside (24×24, p:4, radius:l) + value (Body/m-medium) */}
+              <Row label="Radius">
+                <div style={{ ...propInputPrimary, minWidth: 0 }}>
+                  <span style={iconBtn}><IconRadius /></span>
+                  <input
+                    type="number"
+                    value={Math.round(radius)}
+                    onChange={(e) => onUpdateZoneStyle({ borderRadius: Math.max(0, Number(e.target.value)) })}
+                    style={{ ...numInputInner, width: 0 }}
+                  />
+                </div>
+              </Row>
+              {/* Opacity — same structure, checkerboard icon + value + "%" unit */}
+              <Row label="Opacity">
+                <div style={{ ...propInputPrimary, minWidth: 0 }}>
+                  <span style={iconBtn}><IconOpacity /></span>
+                  <input
+                    type="number"
+                    value={Math.round(opacity)}
+                    onChange={(e) => onUpdateZoneStyle({ opacity: Math.max(0, Math.min(100, Number(e.target.value))) })}
+                    style={{ ...numInputInner, width: 0 }}
+                  />
+                  <span style={{ ...bodyMQuart, flexShrink: 0 }}>%</span>
+                </div>
+              </Row>
+            </div>
+          )}
 
-        {/* Padding */}
-        <SectionHeader label="Padding" open={true} onToggle={() => {}} />
-        <div style={{ padding: '0 20px 16px' }}>
-          <NumInput
-            value={zoneStyle.padding ?? 0}
-            onChange={(v) => onUpdateZoneStyle({ padding: Math.max(0, v) })}
-            unit="px"
+          {/* ── Fill ───────────────────────────────────────────────────────
+              Figma: border-top/default, label "Fill" + eye + minus on right
+              Content: single row — color swatch (24×24 bg/secondary, border/primary, radius/sm)
+                       + hex text (Body/m-medium) + "100 %" (Body/m quaternary)             */}
+          <FillBorderHeader label="Fill" />
+          <div style={{ padding: '0 20px 20px' }}>
+            <div style={{ ...propInputPrimary, gap: 8 }}>
+              {/* Color swatch — matches Figma: bg/secondary, border, radius/sm */}
+              <div style={{
+                width: 24, height: 24, flexShrink: 0,
+                background: fill, border: `1px solid ${DS.borderPrimary}`,
+                borderRadius: DS.radiusSm, overflow: 'hidden', cursor: 'pointer', position: 'relative',
+              }}>
+                <input
+                  type="color" value={fill}
+                  onChange={(e) => onUpdateZoneStyle({ fill: e.target.value })}
+                  style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                />
+              </div>
+              <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(fill)}</span>
+              <span style={{ ...bodyMQuart, flexShrink: 0 }}>{fillOpacity} %</span>
+            </div>
+          </div>
+
+          {/* ── Border ─────────────────────────────────────────────────────
+              Figma: border-top/default, label "Border" + eye + minus on right
+              Row 1: color — swatch + token name "Neutral/White"
+              Row 2: Inside dropdown (Select/shadow) + border-width input (bg/page, stacked-lines icon)
+              Row 3: — Solid dropdown + □ All dropdown (both Select/shadow, equal width)     */}
+          <FillBorderHeader label="Border" />
+          <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {/* Row 1: border color */}
+            <div style={{ ...propInputPrimary, gap: 8 }}>
+              <div style={{
+                width: 24, height: 24, flexShrink: 0,
+                background: bColor, border: `1px solid ${DS.borderPrimary}`,
+                borderRadius: DS.radiusSm, overflow: 'hidden', cursor: 'pointer', position: 'relative',
+              }}>
+                <input
+                  type="color" value={bColor}
+                  onChange={(e) => onUpdateZoneStyle({ borderColor: e.target.value })}
+                  style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                />
+              </div>
+              <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(bColor)}</span>
+            </div>
+            {/* Row 2: Inside + border width */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <StyledSelect
+                value={bPos}
+                onChange={(e) => onUpdateZoneStyle({ borderPosition: e.target.value })}
+                options={[['inside','Inside'],['outside','Outside'],['center','Center']]}
+              />
+              {/* border-width: bg/page, border/primary, radius/xl — stacked-lines icon inside */}
+              <div style={{ ...propInputPrimary, flex: 1, background: DS.bgPage, boxShadow: 'none', gap: 8 }}>
+                <span style={iconBtn}><IconBorderWidth /></span>
+                <input
+                  type="number" value={bWidth}
+                  onChange={(e) => onUpdateZoneStyle({ borderWidth: Math.max(0, Number(e.target.value)) })}
+                  style={numInputInner}
+                />
+              </div>
+            </div>
+            {/* Row 3: — Solid + □ All */}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <StyledSelect
+                value={bStyle}
+                onChange={(e) => onUpdateZoneStyle({ borderStyle: e.target.value })}
+                options={[['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]}
+                leadingIcon={<IconMinusSm />}
+              />
+              <StyledSelect
+                value={bSides}
+                onChange={(e) => onUpdateZoneStyle({ borderSides: e.target.value })}
+                options={[['all','All'],['top','Top'],['right','Right'],['bottom','Bottom'],['left','Left']]}
+                leadingIcon={<IconSquareSm />}
+              />
+            </div>
+          </div>
+
+          {/* ── Layers ─────────────────────────────────────────────────────
+              Figma: Property/Grouping/Dropdown — chevron-down (collapsed)                 */}
+          <SectionHeader label="Layers" open={layersOpen} onToggle={() => setLayersOpen(!layersOpen)} />
+
+        </>)}
+
+        {rightTab === 'presentation' && (
+          <PresentationPanel
+            presDetailsOpen={presDetailsOpen} setPresDetailsOpen={setPresDetailsOpen}
+            presName={presName} setPresName={setPresName}
+            pages={pages} setPages={setPages}
+            DS={DS} bodyM={bodyM} bodyMMedium={bodyMMedium} bodyMMedQuart={bodyMMedQuart}
+            SectionHeader={SectionHeader}
           />
-        </div>
-
-        {/* Corner Radius */}
-        <SectionHeader label="Corner Radius" open={true} onToggle={() => {}} />
-        <div style={{ padding: '0 20px 20px' }}>
-          <NumInput
-            value={zoneStyle.borderRadius ?? 0}
-            onChange={(v) => onUpdateZoneStyle({ borderRadius: Math.max(0, v) })}
-            unit="px"
-          />
-        </div>
+        )}
       </div>
     )
   }
@@ -528,7 +725,7 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
       {/* Pill tabs */}
       <div style={{ padding: '12px 20px 20px', borderBottom: '1px solid #E9EAEB' }}>
         <div className="flex gap-2" style={{ background: '#FFFFFF', padding: 4, borderRadius: 12, border: '1px solid #E9EAEB' }}>
-          {tabs.map((t) => (
+          {[{ id: 'design', label: 'Design' }, { id: 'presentation', label: 'Presentation' }].map((t) => (
             <button
               key={t.id}
               onClick={() => setRightTab(t.id)}
@@ -573,13 +770,13 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
       )}
 
       {rightTab === 'presentation' && (
-        <div className="flex flex-col items-center justify-center flex-1 text-center gap-3" style={{ padding: 24 }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="5" width="18" height="13" rx="1.5" stroke="#D5D7DA" strokeWidth="1.5"/>
-            <path d="M12 18v2M9 20h6" stroke="#D5D7DA" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <p style={{ fontSize: 14, color: '#A4A7AE' }}>Presentation settings will appear here</p>
-        </div>
+        <PresentationPanel
+          presDetailsOpen={presDetailsOpen} setPresDetailsOpen={setPresDetailsOpen}
+          presName={presName} setPresName={setPresName}
+          pages={pages} setPages={setPages}
+          DS={DS} bodyM={bodyM} bodyMMedium={bodyMMedium} bodyMMedQuart={bodyMMedQuart}
+          SectionHeader={SectionHeader}
+        />
       )}
     </div>
   )
@@ -746,32 +943,32 @@ export default function EditorPage() {
   const elementCounter = useRef(0)
 
   // ── Zone state ───────────────────────────────────────────────────────────
-  const [selectedZoneId, setSelectedZoneId] = useState(null)
-  const [zoneStyles, setZoneStyles] = useState({}) // { [zoneId]: { padding, borderRadius } }
+  const [selectedNode, setSelectedNode] = useState(null) // { type: 'frame'|'zone', id } | null
+  const [zoneStyles, setZoneStyles] = useState({})
   const [gridTracks, setGridTracks] = useState(() => ({
     cols: parseGrid(defaultLayout.gridCols),
     rows: parseGrid(defaultLayout.gridRows),
   }))
-  const [gridGap, setGridGap] = useState(2)
+  const gridGap = 24
 
+  const selectedZoneId  = selectedNode?.type === 'zone' ? selectedNode.id : null
   const selectedElement = elements.find((el) => el.id === selectedElementId) ?? null
-  const selectedZone    = selectedLayout?.zones.find((z) => z.id === selectedZoneId) ?? null
-
-  // Which track does the selected zone use?
-  const zoneColIdx  = selectedZone ? (parseInt(String(selectedZone.style.gridColumn ?? '1').split('/')[0].trim(), 10) - 1) : 0
-  const zoneRowIdx  = selectedZone ? (parseInt(String(selectedZone.style.gridRow    ?? '1').split('/')[0].trim(), 10) - 1) : 0
-  const zoneColTrack = gridTracks?.cols?.[zoneColIdx] ?? { value: 1, unit: 'fr' }
-  const zoneRowTrack = gridTracks?.rows?.[zoneRowIdx] ?? { value: 1, unit: 'fr' }
 
   const handleSelectLayout = (layout) => {
     setSelectedLayout(layout)
     setGridTracks({ cols: parseGrid(layout.gridCols), rows: parseGrid(layout.gridRows) })
     setZoneStyles({})
-    setSelectedZoneId(null)
+    setSelectedNode(null)
+  }
+
+  const handleSelectFrame = () => {
+    setSelectedNode({ type: 'frame', id: 'canvas' })
+    setSelectedElementId(null)
+    setEditingElementId(null)
   }
 
   const handleSelectZone = (zoneId) => {
-    setSelectedZoneId(zoneId)
+    setSelectedNode({ type: 'zone', id: zoneId })
     setSelectedElementId(null)
     setEditingElementId(null)
   }
@@ -780,19 +977,6 @@ export default function EditorPage() {
     setZoneStyles((prev) => ({ ...prev, [zoneId]: { ...prev[zoneId], ...patch } }))
   }
 
-  const handleUpdateZoneColTrack = (track) => {
-    if (!gridTracks) return
-    const cols = [...gridTracks.cols]
-    cols[zoneColIdx] = track
-    setGridTracks({ ...gridTracks, cols })
-  }
-
-  const handleUpdateZoneRowTrack = (track) => {
-    if (!gridTracks) return
-    const rows = [...gridTracks.rows]
-    rows[zoneRowIdx] = track
-    setGridTracks({ ...gridTracks, rows })
-  }
 
   const handleAddElement = (partial) => {
     const n = ++elementCounter.current
@@ -840,7 +1024,7 @@ export default function EditorPage() {
   const handleDeselectAll = () => {
     setSelectedElementId(null)
     setEditingElementId(null)
-    setSelectedZoneId(null)
+    setSelectedNode(null)
   }
 
   const panelProps = { onAddElement: handleAddElement }
@@ -969,7 +1153,7 @@ export default function EditorPage() {
           </div>
 
           {/* Canvas */}
-          <div className="flex-1 flex items-center justify-center px-6 min-h-0">
+          <div className="flex-1 flex items-center justify-center px-6 min-h-0" onClick={handleDeselectAll}>
             <div
               className="shadow-lg overflow-hidden"
               style={{
@@ -978,7 +1162,10 @@ export default function EditorPage() {
                 maxHeight: '85%',
                 width: 'min(760px, 90%)',
                 backgroundColor: bgColor,
+                outline: selectedNode?.type === 'frame' ? '2px solid #1570EF' : 'none',
+                outlineOffset: 1,
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <FreeCanvas
                 elements={elements}
@@ -991,7 +1178,8 @@ export default function EditorPage() {
                 bgColor={bgColor}
                 layout={selectedLayout}
                 activeTool={activeTool}
-                onSelectElement={(id) => { setSelectedElementId(id); setEditingElementId(null); setSelectedZoneId(null) }}
+                onSelectElement={(id) => { setSelectedElementId(id); setEditingElementId(null); setSelectedNode(null) }}
+                onSelectFrame={handleSelectFrame}
                 onDeselectAll={handleDeselectAll}
                 onUpdateElement={handleUpdateElement}
                 onAddElement={handleAddElement}
@@ -1018,14 +1206,8 @@ export default function EditorPage() {
           onBringForward={handleBringForward}
           onSendBackward={handleSendBackward}
           selectedZoneId={selectedZoneId}
-          zoneColTrack={zoneColTrack}
-          zoneRowTrack={zoneRowTrack}
-          zoneStyle={zoneStyles[selectedZoneId] ?? { padding: 0, borderRadius: 0 }}
-          gridGap={gridGap}
-          onUpdateZoneColTrack={handleUpdateZoneColTrack}
-          onUpdateZoneRowTrack={handleUpdateZoneRowTrack}
+          zoneStyle={zoneStyles[selectedZoneId] ?? {}}
           onUpdateZoneStyle={(patch) => handleUpdateZoneStyle(selectedZoneId, patch)}
-          onUpdateGridGap={setGridGap}
         />
       </div>
 

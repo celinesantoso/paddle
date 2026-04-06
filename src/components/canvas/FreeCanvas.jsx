@@ -16,7 +16,7 @@
  *  - Double-click text element to enter contentEditable
  */
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // ─── Grid utilities ───────────────────────────────────────────────────────────
 
@@ -192,15 +192,26 @@ export default function FreeCanvas({
   // Shared
   bgColor, layout, activeTool,
   // Element callbacks
-  onSelectElement, onDeselectAll, onUpdateElement, onAddElement, onSetEditing,
+  onSelectElement, onSelectFrame, onDeselectAll, onUpdateElement, onAddElement, onSetEditing,
   // Zone callbacks
   onSelectZone, onUpdateGridTracks,
 }) {
   const canvasRef = useRef(null)
+  const frameRef  = useRef(null)
   const ix = useRef(null) // current drag/resize/zone-resize interaction
   const [hoveredZoneId, setHoveredZoneId] = useState(null)
+  const [frameWidth, setFrameWidth] = useState(720) // tracks rendered frame width for proportional gap
 
-  const gap         = gridGap ?? 2
+  useEffect(() => {
+    const el = frameRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => setFrameWidth(entry.contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const gap   = gridGap ?? 24  // numeric px — used for zone-resize math
+  const gapPx = Math.round((frameWidth / 960) * gap) // proportional px, consistent across axes
   const colTemplate = gridTracks ? buildTemplate(gridTracks.cols) : layout?.gridCols ?? '1fr'
   const rowTemplate = gridTracks ? buildTemplate(gridTracks.rows) : layout?.gridRows ?? '1fr'
 
@@ -213,16 +224,6 @@ export default function FreeCanvas({
     else if (activeTool === 'image')    onAddElement({ type: 'image', x: x-80, y: y-60, width: 160, height: 120 })
   }
 
-  // ── Canvas background click (gap between zones) ─────────────────────────
-  function handleBgPointerDown(e) {
-    if (e.target !== canvasRef.current) return
-    if (activeTool !== 'cursor') {
-      const r = canvasRef.current.getBoundingClientRect()
-      createElementAt(Math.round(e.clientX - r.left), Math.round(e.clientY - r.top))
-    } else {
-      onDeselectAll()
-    }
-  }
 
   // ── Zone interaction ────────────────────────────────────────────────────
 
@@ -362,64 +363,83 @@ export default function FreeCanvas({
   // ─────────────────────────────────────────────────────────────────────────
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex)
 
+  function handleFramePointerDown(e) {
+    if (activeTool !== 'cursor') {
+      const r = canvasRef.current.getBoundingClientRect()
+      createElementAt(Math.round(e.clientX - r.left), Math.round(e.clientY - r.top))
+    } else {
+      onSelectFrame()
+    }
+  }
+
   return (
     <div
       ref={canvasRef}
-      onPointerDown={handleBgPointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
       style={{
         width: '100%', height: '100%',
         position: 'relative', overflow: 'hidden',
-        backgroundColor: bgColor,
-        cursor: activeTool === 'cursor' ? 'default' : 'crosshair',
         userSelect: 'none', touchAction: 'none',
       }}
     >
-      {/* ── Zone grid layer ──────────────────────────────────────────────── */}
+      {/* ── Parent frame + zone grid ─────────────────────────────────────── */}
       {layout && (
         <div
+          ref={frameRef}
+          onPointerDown={handleFramePointerDown}
           style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            display: 'grid',
-            gridTemplateColumns: colTemplate,
-            gridTemplateRows: rowTemplate,
-            gap,
+            position: 'absolute', inset: 0,
+            backgroundColor: bgColor,
+            padding: gapPx,
+            boxSizing: 'border-box',
+            cursor: activeTool === 'cursor' ? 'default' : 'crosshair',
           }}
         >
-          {layout.zones.map((zone) => {
-            const isSelected = selectedZoneId === zone.id
-            const isHovered  = hoveredZoneId  === zone.id && !isSelected
-            const zStyle     = zoneStyles?.[zone.id] || {}
+          <div
+            style={{
+              width: '100%', height: '100%',
+              pointerEvents: 'none',
+              display: 'grid',
+              gridTemplateColumns: colTemplate,
+              gridTemplateRows: rowTemplate,
+              gap: gapPx,
+            }}
+          >
+            {layout.zones.map((zone) => {
+              const isSelected = selectedZoneId === zone.id
+              const isHovered  = hoveredZoneId  === zone.id && !isSelected
+              const zStyle     = zoneStyles?.[zone.id] || {}
 
-            return (
-              <div
-                key={zone.id}
-                style={{
-                  ...zone.style,
-                  pointerEvents: 'auto',
-                  padding: zStyle.padding  ?? 0,
-                  borderRadius: zStyle.borderRadius ?? 0,
-                  background: isSelected ? 'rgba(21,112,239,0.06)'
-                            : isHovered  ? 'rgba(21,112,239,0.03)'
-                            : 'transparent',
-                  border: isSelected ? '2px solid #1570EF'
-                        : isHovered  ? '1px solid rgba(21,112,239,0.4)'
-                        : '1px dashed rgba(0,0,0,0.09)',
-                  boxSizing: 'border-box',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  transition: 'background 0.08s, border-color 0.08s',
-                  cursor: 'default',
-                }}
-                onPointerDown={(e) => handleZonePointerDown(e, zone)}
-                onMouseEnter={() => setHoveredZoneId(zone.id)}
-                onMouseLeave={() => setHoveredZoneId(null)}
-                onMouseMove={(e) => handleZoneMouseMove(e, zone)}
-              />
-            )
-          })}
+              return (
+                <div
+                  key={zone.id}
+                  style={{
+                    ...zone.style,
+                    pointerEvents: 'auto',
+                    borderRadius: zStyle.borderRadius ?? 12,
+                    opacity: (zStyle.opacity ?? 100) / 100,
+                    background: isSelected ? 'rgba(21,112,239,0.06)'
+                              : isHovered  ? 'rgba(21,112,239,0.03)'
+                              : (zStyle.fill ?? '#F5F5F5'),
+                    border: isSelected ? '2px solid #1570EF'
+                          : isHovered  ? '1px solid rgba(21,112,239,0.4)'
+                          : `${zStyle.borderWidth ?? 1}px ${zStyle.borderStyle ?? 'solid'} ${zStyle.borderColor ?? '#E9EAEB'}`,
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'background 0.08s, border-color 0.08s',
+                    cursor: 'default',
+                  }}
+                  onPointerDown={(e) => handleZonePointerDown(e, zone)}
+                  onMouseEnter={() => setHoveredZoneId(zone.id)}
+                  onMouseLeave={() => setHoveredZoneId(null)}
+                  onMouseMove={(e) => handleZoneMouseMove(e, zone)}
+                />
+              )
+            })}
+          </div>
         </div>
       )}
 

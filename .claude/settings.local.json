@@ -18,7 +18,10 @@
       "Bash(\"/c/Program Files/nodejs/npm.cmd\" run dev)",
       "Bash(cmd.exe /c \"set PATH=C:\\\\Program Files\\\\nodejs;%PATH% && npm run dev\")",
       "mcp__aafc2559-4601-488c-833d-de4ede5c5ea3__use_figma",
-      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\celin\\\\.git\")"
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\celin\\\\.git\")",
+      "mcp__claude_ai_Figma__get_design_context",
+      "mcp__figma__get_screenshot",
+      "mcp__figma__get_variable_defs"
     ]
   }
 }
