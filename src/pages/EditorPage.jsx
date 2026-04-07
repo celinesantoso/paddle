@@ -172,7 +172,7 @@ function SectionHeader({ label, open, onToggle }) {
 
 // ── Presentation panel — shared between zone and slide contexts ───────────────
 // All tokens passed in as props to avoid re-declaring DS inside the function body.
-function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setPresName, pages, presPageMeta, setPresPageMeta, onAddPage, DS, bodyM, bodyMMedium, bodyMMedQuart, SectionHeader }) {
+function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setPresName, pages, presPageMeta, setPresPageMeta, onAddPage, onDeletePage, DS, bodyM, bodyMMedium, bodyMMedQuart, SectionHeader }) {
   const fieldStyle = {
     background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
     borderRadius: DS.radiusXl, padding: '8px 16px',
@@ -211,8 +211,18 @@ function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setP
           const meta = presPageMeta[page.id] ?? { name: '', duration: '' }
           return (
             <div key={page.id}>
-              <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ ...bodyM }}>{page.label || `Page ${idx + 1}`}</span>
+              <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ ...bodyM, flex: 1 }}>{page.label || `Page ${idx + 1}`}</span>
+                <button
+                  title="Delete page"
+                  disabled={pages.length <= 1}
+                  onClick={() => onDeletePage(page.id)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4, borderRadius: DS.radiusL, border: 'none', background: 'none', cursor: pages.length <= 1 ? 'not-allowed' : 'pointer', opacity: pages.length <= 1 ? 0.3 : 1, flexShrink: 0 }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4h12M5.333 4V2.667a.667.667 0 01.667-.667h4a.667.667 0 01.667.667V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333A.667.667 0 004.667 14h6.666a.667.667 0 00.667-.667L12.667 4" stroke="#D92D20" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
               <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -271,6 +281,7 @@ function RightPanel({
   onUpdateZoneStyle,
   pages,
   onAddPage,
+  onDeletePage,
   presPageMeta,
   setPresPageMeta,
 }) {
@@ -539,6 +550,7 @@ function RightPanel({
       presPageMeta={presPageMeta}
       setPresPageMeta={setPresPageMeta}
       onAddPage={onAddPage}
+      onDeletePage={onDeletePage}
       DS={DS}
       bodyM={bodyM}
       bodyMMedium={bodyMMedium}
@@ -2655,7 +2667,7 @@ export default function EditorPage() {
 
   const handleAddPage = () => {
     const n = ++pageCounter.current
-    const newPage = { id: `page_${n}`, label: `Page ${n}` }
+    const newPage = { id: `page_${n}`, label: `Page ${pages.length + 1}` }
     // Save current page state before switching
     savedPageStates.current[currentPageId] = { selectedLayout, gridTracks, zoneStyles, elements, bgColor }
     setPages((prev) => [...prev, newPage])
@@ -2669,6 +2681,39 @@ export default function EditorPage() {
     setSelectedElementId(null)
     setEditingElementId(null)
     setSelectedNode(null)
+  }
+
+  const handleDeletePage = (pageId) => {
+    setPages((prev) => {
+      if (prev.length <= 1) return prev // must keep at least one page
+      const idx = prev.findIndex((p) => p.id === pageId)
+      const next = prev.filter((p) => p.id !== pageId).map((p, i) => ({ ...p, label: `Page ${i + 1}` }))
+      // If deleting the current page, switch to neighbour
+      if (pageId === currentPageId) {
+        const newCurrent = next[Math.max(0, idx - 1)]
+        const saved = savedPageStates.current[newCurrent.id]
+        if (saved) {
+          setSelectedLayout(saved.selectedLayout)
+          setGridTracks(saved.gridTracks)
+          setZoneStyles(saved.zoneStyles)
+          setElements(saved.elements)
+          setBgColor(saved.bgColor)
+        } else {
+          setSelectedLayout(defaultLayout)
+          setGridTracks({ cols: parseGrid(defaultLayout.gridCols), rows: parseGrid(defaultLayout.gridRows) })
+          setZoneStyles({})
+          setElements([])
+          setBgColor('#ffffff')
+        }
+        setCurrentPageId(newCurrent.id)
+        setSelectedElementId(null)
+        setEditingElementId(null)
+        setSelectedNode(null)
+      }
+      delete savedPageStates.current[pageId]
+      setPresPageMeta((prev) => { const n = { ...prev }; delete n[pageId]; return n })
+      return next
+    })
   }
 
   const handleSelectPage = (pageId) => {
@@ -2899,6 +2944,53 @@ export default function EditorPage() {
           className="flex-1 flex flex-col min-w-0 overflow-hidden"
           style={{ backgroundColor: '#F5F5F5' }}
         >
+          {/* ── Canvas Header ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
+            <span style={{ fontSize: 20, fontWeight: 500, lineHeight: '32px', color: '#535862', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
+              {pages.find((p) => p.id === currentPageId)?.label ?? 'Page 1'}
+            </span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+              {/* New Page */}
+              <button
+                onClick={handleAddPage}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3v10M3 8h10" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <span style={{ fontSize: 14, fontWeight: 600, lineHeight: '20px', color: '#0A0D12', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>New Page</span>
+              </button>
+              {/* Chevron Left */}
+              <button
+                onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx > 0) handleSelectPage(pages[idx - 1].id) }}
+                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 12L6 8l4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {/* Chevron Right */}
+              <button
+                onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx < pages.length - 1) handleSelectPage(pages[idx + 1].id) }}
+                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 12l4-4-4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {/* Three Dots */}
+              <button
+                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="3" r="1.25" fill="#0A0D12"/>
+                  <circle cx="8" cy="8" r="1.25" fill="#0A0D12"/>
+                  <circle cx="8" cy="13" r="1.25" fill="#0A0D12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
           {/* Canvas */}
           <div className="flex-1 flex items-center justify-center px-6 min-h-0" onClick={handleDeselectAll}>
             <div
@@ -2964,6 +3056,7 @@ export default function EditorPage() {
           onUpdateZoneStyle={(patch) => handleUpdateZoneStyle(selectedZoneId, patch)}
           pages={pages}
           onAddPage={handleAddPage}
+          onDeletePage={handleDeletePage}
           presPageMeta={presPageMeta}
           setPresPageMeta={setPresPageMeta}
         />
