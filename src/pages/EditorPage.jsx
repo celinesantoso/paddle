@@ -172,7 +172,7 @@ function SectionHeader({ label, open, onToggle }) {
 
 // ── Presentation panel — shared between zone and slide contexts ───────────────
 // All tokens passed in as props to avoid re-declaring DS inside the function body.
-function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setPresName, pages, setPages, DS, bodyM, bodyMMedium, bodyMMedQuart, SectionHeader }) {
+function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setPresName, pages, presPageMeta, setPresPageMeta, onAddPage, DS, bodyM, bodyMMedium, bodyMMedQuart, SectionHeader }) {
   const fieldStyle = {
     background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
     borderRadius: DS.radiusXl, padding: '8px 16px',
@@ -206,50 +206,45 @@ function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setP
           </div>
         )}
 
-        {/* One section per page */}
-        {pages.map((page, idx) => (
-          <div key={page.id}>
-            <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ ...bodyM }}>Page {idx + 1}</span>
-              <button
-                onClick={() => setPages((prev) => { const c = [...prev]; c.splice(idx + 1, 0, { id: Date.now(), name: '', duration: '' }); return c })}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', color: DS.fgQuaternary, padding: 0 }}
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <span style={{ ...bodyMMedQuart }}>Page Name</span>
-                <div style={fieldStyle}>
-                  <input
-                    type="text" value={page.name}
-                    onChange={(e) => setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, name: e.target.value } : p))}
-                    placeholder={`Page ${idx + 1}`} style={inputStyle(page.name)}
-                  />
-                </div>
+        {/* One section per page — driven by bottom-bar pages */}
+        {pages.map((page, idx) => {
+          const meta = presPageMeta[page.id] ?? { name: '', duration: '' }
+          return (
+            <div key={page.id}>
+              <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ ...bodyM }}>{page.label || `Page ${idx + 1}`}</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <span style={{ ...bodyMMedQuart }}>Duration</span>
-                <div style={{ ...fieldStyle, height: 40 }}>
-                  <input
-                    type="text" value={page.duration}
-                    onChange={(e) => setPages((prev) => prev.map((p) => p.id === page.id ? { ...p, duration: e.target.value } : p))}
-                    placeholder="00:00:00.0" style={inputStyle(page.duration)}
-                  />
+              <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <span style={{ ...bodyMMedQuart }}>Page Name</span>
+                  <div style={fieldStyle}>
+                    <input
+                      type="text" value={meta.name}
+                      onChange={(e) => setPresPageMeta((prev) => ({ ...prev, [page.id]: { ...meta, name: e.target.value } }))}
+                      placeholder={`Page ${idx + 1}`} style={inputStyle(meta.name)}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <span style={{ ...bodyMMedQuart }}>Duration</span>
+                  <div style={{ ...fieldStyle, height: 40 }}>
+                    <input
+                      type="text" value={meta.duration}
+                      onChange={(e) => setPresPageMeta((prev) => ({ ...prev, [page.id]: { ...meta, duration: e.target.value } }))}
+                      placeholder="00:00:00.0" style={inputStyle(meta.duration)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Add Page — pinned bottom, bg/brand full-width button */}
       <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: 20, background: DS.bgPrimary }}>
         <button
-          onClick={() => setPages((prev) => [...prev, { id: Date.now(), name: '', duration: '' }])}
+          onClick={onAddPage}
           style={{
             width: '100%', padding: '8px 14px',
             background: '#1570EF', border: '1px solid #175CD3',
@@ -273,7 +268,11 @@ function RightPanel({
   onSendBackward,
   selectedZoneId,
   zoneStyle,
-  onUpdateZoneStyle
+  onUpdateZoneStyle,
+  pages,
+  onAddPage,
+  presPageMeta,
+  setPresPageMeta,
 }) {
   const [rightTab, setRightTab] = useState('design')
   const [dimsOpen, setDimsOpen] = useState(true)
@@ -282,7 +281,6 @@ function RightPanel({
   const [layersOpen, setLayersOpen] = useState(false)
   const [presDetailsOpen, setPresDetailsOpen] = useState(true)
   const [presName, setPresName] = useState('')
-  const [pages, setPages] = useState([{ id: 1, name: '', duration: '' }])
 
   const panelStyle = { width: 320, borderLeft: '1px solid #E9EAEB', background: '#FFFFFF' }
 
@@ -487,36 +485,24 @@ function RightPanel({
     )
   }
 
-  const _avatar   = 'https://www.figma.com/api/mcp/asset/633c4e83-129b-4266-84a8-11a4ca6663a5'
-  const _playIcon = 'https://www.figma.com/api/mcp/asset/0e9f135e-9d0c-48ce-b100-c61bd89f9610'
-
   const skeuShadowPanel = `inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)`
 
   const renderTabBar = () => (
     <div style={{ background: '#FFFFFF', flexShrink: 0 }}>
-      {/* Avatar + Save + Preview header */}
-      <div style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 76 }}>
-        <div style={{ border: '2px solid #175CD3', borderRadius: 999, width: 36, height: 36, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
-          <img alt="" src={_avatar} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: 999 }} />
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button style={{ border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px', background: '#FFFFFF', fontSize: 14, fontWeight: 600, color: '#0A0D12', cursor: 'pointer', fontFamily: 'inherit', lineHeight: '20px', boxShadow: skeuShadowPanel }}>
-            Save
-          </button>
-          <button style={{ border: '1px solid #175CD3', borderRadius: 10, padding: '8px 14px', background: '#1570EF', fontSize: 14, fontWeight: 600, color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', lineHeight: '20px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: skeuShadowPanel }}>
-            <div style={{ width: 16, height: 16, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
-              <div style={{ position: 'absolute', inset: '12.5% 12.49% 12.5% 20.83%' }}>
-                <div style={{ position: 'absolute', inset: '-8.33% -9.37%' }}>
-                  <img alt="" src={_playIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-            Preview
-          </button>
-        </div>
+      {/* Save + Preview header */}
+      <div style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, borderBottom: `1px solid ${DS.borderDefault}` }}>
+        <button style={{ border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px', background: '#FFFFFF', fontSize: 14, fontWeight: 600, color: '#0A0D12', cursor: 'pointer', fontFamily: 'inherit', lineHeight: '20px', boxShadow: skeuShadowPanel }}>
+          Save
+        </button>
+        <button style={{ border: '1px solid #175CD3', borderRadius: 10, padding: '8px 14px', background: '#1570EF', fontSize: 14, fontWeight: 600, color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', lineHeight: '20px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: skeuShadowPanel }}>
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+            <path d="M6 4l10 6-10 6V4z" fill="currentColor"/>
+          </svg>
+          Preview
+        </button>
       </div>
       {/* Tabs */}
-      <div style={{ padding: '0 20px 20px', borderBottom: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 8 }}>
+      <div style={{ padding: '20px 20px 20px', borderBottom: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 8 }}>
         {[{ id: 'design', label: 'Design' }, { id: 'presentation', label: 'Presentation' }].map((t) => (
           <button
             key={t.id}
@@ -550,7 +536,9 @@ function RightPanel({
       presName={presName}
       setPresName={setPresName}
       pages={pages}
-      setPages={setPages}
+      presPageMeta={presPageMeta}
+      setPresPageMeta={setPresPageMeta}
+      onAddPage={onAddPage}
       DS={DS}
       bodyM={bodyM}
       bodyMMedium={bodyMMedium}
@@ -2657,8 +2645,13 @@ export default function EditorPage() {
   const pageCounter = useRef(1)
   const [pages, setPages] = useState([{ id: 'page_1', label: 'Page 1' }])
   const [currentPageId, setCurrentPageId] = useState('page_1')
+  const [presPageMeta, setPresPageMeta] = useState({})
   // Per-page state snapshots (for non-active pages)
   const savedPageStates = useRef({})
+
+  const handleRenameCurrentPage = (name) => {
+    setPages((prev) => prev.map((p) => p.id === currentPageId ? { ...p, label: name } : p))
+  }
 
   const handleAddPage = () => {
     const n = ++pageCounter.current
@@ -2814,100 +2807,90 @@ export default function EditorPage() {
   return (
     <div className="flex flex-col" style={{ height: '100vh', overflow: 'hidden' }}>
 
-      {/* ── Top Bar ── */}
-      <header
-        className="flex items-center justify-between px-4 shrink-0 border-b"
-        style={{ height: 56, backgroundColor: '#fff', borderColor: '#E4E7EC' }}
-      >
-        {/* Left */}
-        <div className="flex items-center gap-3">
-          <Link to="/design-system" className="text-gray-900 font-black italic text-lg tracking-tight hover:opacity-80">
-            paddle
-          </Link>
-          {/* Auto-save pill */}
-          <div className="flex items-center gap-1.5 border border-gray-200 rounded-full px-2.5 py-1 text-xs text-gray-500">
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-              <path d="M3 10a7 7 0 1114 0 7 7 0 01-14 0z" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M6 10l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Auto-save on
-          </div>
-          {/* Plus button */}
-          <button className="w-7 h-7 border border-gray-200 rounded flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-              <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Center */}
-        <span className="text-sm font-medium text-gray-700">Untitled Presentation</span>
-
-        {/* Right */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300" />
-          <button className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg px-3 py-1.5 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-              <path d="M6 4l10 6-10 6V4z" fill="currentColor"/>
-            </svg>
-            Preview
-          </button>
-        </div>
-      </header>
-
       {/* ── Main area ── */}
       <div className="flex flex-1 min-h-0">
 
-        {/* ── Left Icon Sidebar ── */}
-        <div
-          className="flex flex-col py-3 shrink-0 border-r gap-1.5"
-          style={{ width: 72, backgroundColor: '#fff', borderColor: '#E9EAEB' }}
-        >
-          {SIDEBAR_TABS.map(({ id, label, Icon }) => {
-            const isActive = activeTab === id
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className="flex flex-col items-center gap-1.5 mx-1.5 rounded-lg cursor-pointer transition-colors"
+        {/* ── Left Panel Area (icon sidebar + content panel, with own top section) ── */}
+        <div className="flex flex-col shrink-0 border-r" style={{ width: 370, backgroundColor: '#fff', borderColor: '#E9EAEB' }}>
+
+          {/* Left panel top section */}
+          <div className="shrink-0" style={{ borderBottom: '1px solid #E9EAEB' }}>
+            {/* Row 1: paddle + autosave */}
+            <div className="flex items-center justify-between" style={{ padding: '10px 12px', height: 56 }}>
+              <Link to="/design-system" className="text-gray-900 font-black italic text-lg tracking-tight hover:opacity-80">
+                paddle
+              </Link>
+              <div className="flex items-center" style={{ gap: 6, background: '#F5F5F5', border: '1px solid #E9EAEB', borderRadius: 8, padding: '6px 14px', fontSize: 14, fontWeight: 500, color: '#717680', lineHeight: '20px' }}>
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                  <path d="M3 10a7 7 0 1114 0 7 7 0 01-14 0z" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M6 10l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Autosave On
+              </div>
+            </div>
+            {/* Row 2: editable page name */}
+            <div style={{ paddingLeft: 24, paddingRight: 12, paddingBottom: 12, paddingTop: 0 }}>
+              <input
+                type="text"
+                value={pages.find((p) => p.id === currentPageId)?.label ?? ''}
+                onChange={(e) => handleRenameCurrentPage(e.target.value)}
                 style={{
-                  padding: '10px 12px',
-                  backgroundColor: isActive ? 'var(--bg-primary-hover)' : 'transparent',
-                  color: isActive ? 'var(--foreground-primary)' : 'var(--foreground-quaternary)',
+                  fontSize: 20, fontWeight: 500, lineHeight: '32px',
+                  color: '#0A0D12', background: 'transparent', border: 'none',
+                  outline: 'none', width: '100%', fontFamily: 'inherit',
                 }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-primary-hover)' }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent' }}
-              >
-                <Icon />
-                <span style={{ fontSize: 12, lineHeight: '16px', fontWeight: 400 }}>{label}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* ── Left Panel ── */}
-        <div
-          className="flex flex-col shrink-0 border-r overflow-hidden"
-          style={{ width: 298, backgroundColor: '#fff', borderColor: '#E9EAEB' }}
-        >
-          {/* Panel header — hidden, each panel owns its own search/header */}
-
-          {/* Panel content */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            {activeTab === 'layout' && (
-              <LayoutPanel
-                selectedLayoutId={selectedLayout?.id}
-                onSelectLayout={handleSelectLayout}
               />
-            )}
-            {activeTab === 'text' && <TextPanel {...panelProps} />}
-            {activeTab === 'logo' && <LogoPanel {...panelProps} />}
-            {activeTab === 'widgets' && <WidgetsPanel {...panelProps} />}
-            {activeTab === 'media' && <MediaPanel {...panelProps} />}
-            {activeTab === 'brandkit' && <BrandKitPanel {...panelProps} />}
-            {activeTab === 'template' && (
-              <TemplatePanel {...panelProps} onSelectLayout={handleSelectLayout} />
-            )}
+            </div>
+          </div>
+
+          {/* Icon sidebar + content panel side by side */}
+          <div className="flex flex-1 min-h-0">
+            {/* ── Left Icon Sidebar ── */}
+            <div
+              className="flex flex-col py-3 shrink-0 border-r gap-1.5"
+              style={{ width: 72, borderColor: '#E9EAEB' }}
+            >
+              {SIDEBAR_TABS.map(({ id, label, Icon }) => {
+                const isActive = activeTab === id
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className="flex flex-col items-center gap-1.5 mx-1.5 rounded-lg cursor-pointer transition-colors"
+                    style={{
+                      padding: '10px 12px',
+                      backgroundColor: isActive ? 'var(--bg-primary-hover)' : 'transparent',
+                      color: isActive ? 'var(--foreground-primary)' : 'var(--foreground-quaternary)',
+                    }}
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--bg-primary-hover)' }}
+                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    <Icon />
+                    <span style={{ fontSize: 12, lineHeight: '16px', fontWeight: 400 }}>{label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* ── Left Content Panel ── */}
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden flex flex-col">
+                {activeTab === 'layout' && (
+                  <LayoutPanel
+                    selectedLayoutId={selectedLayout?.id}
+                    onSelectLayout={handleSelectLayout}
+                  />
+                )}
+                {activeTab === 'text' && <TextPanel {...panelProps} />}
+                {activeTab === 'logo' && <LogoPanel {...panelProps} />}
+                {activeTab === 'widgets' && <WidgetsPanel {...panelProps} />}
+                {activeTab === 'media' && <MediaPanel {...panelProps} />}
+                {activeTab === 'brandkit' && <BrandKitPanel {...panelProps} />}
+                {activeTab === 'template' && (
+                  <TemplatePanel {...panelProps} onSelectLayout={handleSelectLayout} />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2916,24 +2899,6 @@ export default function EditorPage() {
           className="flex-1 flex flex-col min-w-0 overflow-hidden"
           style={{ backgroundColor: '#F5F5F5' }}
         >
-          {/* Canvas top controls */}
-          <div className="flex items-center justify-between px-4 py-2 shrink-0">
-            <span className="text-xs font-medium text-gray-500">Page 1</span>
-            <div className="flex items-center gap-2">
-              <button className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 border border-gray-200 rounded px-2 py-1 bg-white hover:bg-gray-50 transition-colors">
-                <svg width="10" height="10" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                New Page
-              </button>
-              <button className="text-gray-400 hover:text-gray-600 w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 transition-colors">
-                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
-                  <circle cx="4" cy="10" r="1.5"/><circle cx="10" cy="10" r="1.5"/><circle cx="16" cy="10" r="1.5"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
           {/* Canvas */}
           <div className="flex-1 flex items-center justify-center px-6 min-h-0" onClick={handleDeselectAll}>
             <div
@@ -2997,6 +2962,10 @@ export default function EditorPage() {
           selectedZoneId={selectedZoneId}
           zoneStyle={zoneStyles[selectedZoneId] ?? {}}
           onUpdateZoneStyle={(patch) => handleUpdateZoneStyle(selectedZoneId, patch)}
+          pages={pages}
+          onAddPage={handleAddPage}
+          presPageMeta={presPageMeta}
+          setPresPageMeta={setPresPageMeta}
         />
       </div>
 
