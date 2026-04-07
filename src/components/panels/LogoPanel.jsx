@@ -253,16 +253,16 @@ export default function LogoPanel({ onAddElement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', flexShrink: 0 }}>
           <SectionLabel>Color</SectionLabel>
           <div style={tileWrap}>
-            <Tile bg={DS.indigo600} style={tileFixed}>
+            <Tile bg={DS.indigo600} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: DS.indigo600, g1: imgGroup1, g2: imgGroup2, g3: imgGroup3, maskImg: imgGroup4, fill: imgGroup5 } })}>
               <IpopLogo g1={imgGroup1} g2={imgGroup2} g3={imgGroup3} maskImg={imgGroup4} fill={imgGroup5} />
             </Tile>
-            <Tile bg="#000000" style={tileFixed}>
+            <Tile bg="#000000" style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: '#000000', g1: imgGroup6, g2: imgGroup7, g3: imgGroup8, maskImg: imgGroup4, fill: imgGroup5 } })}>
               <IpopLogo g1={imgGroup6} g2={imgGroup7} g3={imgGroup8} maskImg={imgGroup4} fill={imgGroup5} />
             </Tile>
-            <Tile bg={DS.indigo300} style={tileFixed}>
+            <Tile bg={DS.indigo300} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: DS.indigo300, g1: imgGroup9, g2: imgGroup10, g3: imgGroup11, maskImg: imgGroup4, fill: imgGroup12 } })}>
               <IpopLogo g1={imgGroup9} g2={imgGroup10} g3={imgGroup11} maskImg={imgGroup4} fill={imgGroup12} />
             </Tile>
-            <Tile bg={DS.indigo900} style={tileFixed}>
+            <Tile bg={DS.indigo900} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: DS.indigo900, g1: imgGroup1, g2: imgGroup2, g3: imgGroup3, maskImg: imgGroup4, fill: imgGroup5 } })}>
               <IpopLogo g1={imgGroup1} g2={imgGroup2} g3={imgGroup3} maskImg={imgGroup4} fill={imgGroup5} />
             </Tile>
           </div>
@@ -272,10 +272,10 @@ export default function LogoPanel({ onAddElement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', flexShrink: 0 }}>
           <SectionLabel>Black &amp; White</SectionLabel>
           <div style={{ display: 'flex', gap: 10, width: '100%' }}>
-            <Tile bg={DS.bgSecondary} style={tileFluid}>
+            <Tile bg={DS.bgSecondary} style={tileFluid} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: DS.bgSecondary, g1: imgGroup13, g2: imgGroup14, g3: imgGroup15, maskImg: imgGroup4, fill: imgGroup16 } })}>
               <IpopLogo g1={imgGroup13} g2={imgGroup14} g3={imgGroup15} maskImg={imgGroup4} fill={imgGroup16} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFluid}>
+            <Tile bg={DS.bgSecondary} style={tileFluid} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'ipop', bg: DS.bgSecondary, g1: imgGroup1, g2: imgGroup2, g3: imgGroup3, maskImg: imgGroup4, fill: imgGroup17 } })}>
               <IpopLogo g1={imgGroup1} g2={imgGroup2} g3={imgGroup3} maskImg={imgGroup4} fill={imgGroup17} />
             </Tile>
           </div>
@@ -285,16 +285,16 @@ export default function LogoPanel({ onAddElement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', flexShrink: 0 }}>
           <SectionLabel>Solar</SectionLabel>
           <div style={tileWrap}>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'solar', bg: DS.bgSecondary, fillInner: imgGroup19, fillOuter: imgGroup21, vector: imgVector9 } })}>
               <SolarLogo fillInner={imgGroup19} fillOuter={imgGroup21} vector={imgVector9} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'solar', bg: DS.bgSecondary, fillInner: imgGroup22, fillOuter: imgGroup23, vector: imgVector10 } })}>
               <SolarLogo fillInner={imgGroup22} fillOuter={imgGroup23} vector={imgVector10} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'solar', bg: DS.bgSecondary, fillInner: imgGroup24, fillOuter: imgGroup25, vector: imgVector11 } })}>
               <SolarLogo fillInner={imgGroup24} fillOuter={imgGroup25} vector={imgVector11} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'solar', bg: DS.bgSecondary, fillInner: imgGroup26, fillOuter: imgGroup27, vector: imgVector12 } })}>
               <SolarLogo fillInner={imgGroup26} fillOuter={imgGroup27} vector={imgVector12} />
             </Tile>
           </div>
@@ -304,16 +304,16 @@ export default function LogoPanel({ onAddElement }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', flexShrink: 0 }}>
           <SectionLabel>Planet</SectionLabel>
           <div style={tileWrap}>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'planet', bg: DS.bgSecondary, fillBg: imgGroup29, v1: imgVector13, v2: imgVector14, v3: imgVector15, v4: imgVector16, v5: imgVector17, fillPlanet: imgGroup31 } })}>
               <PlanetLogo fillBg={imgGroup29} v1={imgVector13} v2={imgVector14} v3={imgVector15} v4={imgVector16} v5={imgVector17} fillPlanet={imgGroup31} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'planet', bg: DS.bgSecondary, fillBg: imgGroup32, v1: imgVector18, v2: imgVector19, v3: imgVector20, v4: imgVector21, v5: imgVector22, fillPlanet: imgGroup33 } })}>
               <PlanetLogo fillBg={imgGroup32} v1={imgVector18} v2={imgVector19} v3={imgVector20} v4={imgVector21} v5={imgVector22} fillPlanet={imgGroup33} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'planet', bg: DS.bgSecondary, fillBg: imgGroup34, v1: imgVector23, v2: imgVector24, v3: imgVector25, v4: imgVector26, v5: imgVector27, fillPlanet: imgGroup35 } })}>
               <PlanetLogo fillBg={imgGroup34} v1={imgVector23} v2={imgVector24} v3={imgVector25} v4={imgVector26} v5={imgVector27} fillPlanet={imgGroup35} />
             </Tile>
-            <Tile bg={DS.bgSecondary} style={tileFixed}>
+            <Tile bg={DS.bgSecondary} style={tileFixed} onClick={() => onAddElement({ type: 'logo', width: 200, height: 115, opacity: 100, logoMeta: { type: 'planet', bg: DS.bgSecondary, fillBg: imgGroup36, v1: imgVector28, v2: imgVector29, v3: imgVector30, v4: imgVector31, v5: imgVector32, fillPlanet: imgGroup37 } })}>
               <PlanetLogo fillBg={imgGroup36} v1={imgVector28} v2={imgVector29} v3={imgVector30} v4={imgVector31} v5={imgVector32} fillPlanet={imgGroup37} />
             </Tile>
           </div>

@@ -137,13 +137,122 @@ function ImageEl({ el, isSelected, onPointerDown, onResizeStart }) {
   )
 }
 
-function LogoEl({ el, isSelected, onPointerDown, onResizeStart }) {
-  const m = el.logoMeta || { bg: '#2563EB', text: '#fff', name: 'ipop' }
+// ─── Logo canvas rendering helpers ───────────────────────────────────────────
+// Shared mask URLs (hardcoded — same across all tiles of each type)
+const _IPOP_MASK   = 'https://www.figma.com/api/mcp/asset/f90da30e-7c83-4a4a-ba30-09c5a7d51d39'
+const _SOLAR_MSK1  = 'https://www.figma.com/api/mcp/asset/49d57029-967f-4c2a-a8ae-c66fd16bb3ab'
+const _SOLAR_MSK2  = 'https://www.figma.com/api/mcp/asset/63d88ac1-a34b-4df0-bad7-aefc2ea6c4b6'
+const _PLNT_MSK1   = 'https://www.figma.com/api/mcp/asset/591e5752-06e2-4ce9-80e6-d1c65d084570'
+const _PLNT_MSK2   = 'https://www.figma.com/api/mcp/asset/29cc1184-bcba-4b64-b5b0-76980fb04e97'
+
+const _a = { position: 'absolute' }
+const _img = { ..._a, display: 'block', width: '100%', height: '100%', maxWidth: 'none' }
+const _ins = (t, r, b, l) => ({ ..._a, top: t, right: r, bottom: b, left: l })
+const _msk = (url, size, pos) => ({
+  WebkitMaskImage: `url('${url}')`, maskImage: `url('${url}')`,
+  WebkitMaskSize: size, maskSize: size,
+  WebkitMaskPosition: pos, maskPosition: pos,
+  WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+})
+
+function _IpopLogo({ g1, g2, g3, maskImg, fill }) {
+  const mk = maskImg || _IPOP_MASK
   return (
-    <div style={{ ...elBase(el, isSelected), background: m.bg, borderRadius: 8, border: m.border ? '1px solid #E9EAEB' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      onPointerDown={onPointerDown}>
-      <span style={{ color: m.text, fontWeight: 900, fontStyle: 'italic', fontSize: Math.max(12, el.width * 0.14), fontFamily: 'Geist, sans-serif' }}>{m.name}</span>
-      {isSelected && <ResizeHandles onResizeStart={onResizeStart} />}
+    <div style={{ ..._a, left: '50%', top: 'calc(50% - 0.48px)', transform: 'translate(-50%,-50%)', width: 80, height: 37.044 }}>
+      <div style={_ins('0.12%','81.71%','21.09%','-0.09%')}>
+        <div style={_ins('-5.63%','-5.63%','-5.63%','-5.63%')}><img alt="" style={_img} src={g1} /></div>
+      </div>
+      <div style={_ins('25.03%','54.99%','0.37%','10.58%')}>
+        <div style={_ins('-5%','-5%','-5%','-5%')}><img alt="" style={_img} src={g2} /></div>
+      </div>
+      <div style={_ins('25.03%','-0.12%','0.37%','65.69%')}>
+        <div style={_ins('-5%','-5%','-5%','-5%')}><img alt="" style={_img} src={g3} /></div>
+      </div>
+      <div style={{ ..._ins('26.58%','29.7%','17.46%','44.39%'), ..._msk(mk,'20.735px 20.734px','0.008px 0.006px') }}>
+        <img alt="" style={_img} src={fill} />
+      </div>
+    </div>
+  )
+}
+
+function _SolarLogo({ fillInner, fillOuter, vector }) {
+  return (
+    <div style={{ ..._a, left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 64, height: 64, overflow: 'hidden' }}>
+      <div style={{ ..._ins('27.65%','27.94%','27.95%','27.65%'), ..._msk(_SOLAR_MSK1,'28.367px 28.364px','0px 0px') }}>
+        <img alt="" style={_img} src={fillInner} />
+      </div>
+      <div style={{ ..._ins('0.01%','0.3%','0.3%','0.01%'), ..._msk(_SOLAR_MSK2,'63.82px 63.819px','-0.008px -0.004px') }}>
+        <img alt="" style={_img} src={fillOuter} />
+      </div>
+      <div style={_ins('20.07%','20.37%','20.37%','20.07%')}><img alt="" style={_img} src={vector} /></div>
+    </div>
+  )
+}
+
+function _PlanetLogo({ fillBg, v1, v2, v3, v4, v5, fillPlanet }) {
+  return (
+    <div style={{ ..._a, left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 90.23, height: 64, overflow: 'hidden' }}>
+      <div style={{ ..._ins('0.31%','0.41%','0.26%','0.22%'), ..._msk(_PLNT_MSK1,'90.09px 63.902px','-0.195px -0.182px') }}>
+        <img alt="" style={_img} src={fillBg} />
+      </div>
+      <div style={_ins('13.56%','45.62%','68.49%','21.36%')}><img alt="" style={_img} src={v1} /></div>
+      <div style={_ins('68.54%','21.55%','13.52%','45.43%')}><img alt="" style={_img} src={v2} /></div>
+      <div style={_ins('42.25%','57.31%','24.33%','16.02%')}><img alt="" style={_img} src={v3} /></div>
+      <div style={_ins('24.27%','22.38%','24.22%','22.19%')}><img alt="" style={_img} src={v4} /></div>
+      <div style={_ins('24.37%','16.21%','42.21%','57.12%')}><img alt="" style={_img} src={v5} /></div>
+      <div style={{ ..._ins('24.76%','32.27%','24.99%','32.08%'), ..._msk(_PLNT_MSK2,'32.164px 32.161px','0px 0px') }}>
+        <img alt="" style={_img} src={fillPlanet} />
+      </div>
+    </div>
+  )
+}
+
+// 8 circular handles for logo elements (#1B6FFF, corners = proportional, midpoints = single-axis)
+const _LOGO_HANDLES = [
+  { id: 'nw', cursor: 'nw-resize', pos: { top: -(H/2), left: -(H/2) } },
+  { id: 'n',  cursor: 'n-resize',  pos: { top: -(H/2), left: '50%', transform: 'translateX(-50%)' } },
+  { id: 'ne', cursor: 'ne-resize', pos: { top: -(H/2), right: -(H/2) } },
+  { id: 'e',  cursor: 'e-resize',  pos: { top: '50%',  right: -(H/2), transform: 'translateY(-50%)' } },
+  { id: 'se', cursor: 'se-resize', pos: { bottom: -(H/2), right: -(H/2) } },
+  { id: 's',  cursor: 's-resize',  pos: { bottom: -(H/2), left: '50%', transform: 'translateX(-50%)' } },
+  { id: 'sw', cursor: 'sw-resize', pos: { bottom: -(H/2), left: -(H/2) } },
+  { id: 'w',  cursor: 'w-resize',  pos: { top: '50%',  left: -(H/2), transform: 'translateY(-50%)' } },
+]
+
+function LogoResizeHandles({ onResizeStart }) {
+  return _LOGO_HANDLES.map((h) => (
+    <div
+      key={h.id}
+      onPointerDown={(e) => { e.stopPropagation(); onResizeStart(e, h.id) }}
+      style={{
+        position: 'absolute', width: H, height: H,
+        background: '#1B6FFF', borderRadius: '50%',
+        border: '1.5px solid #fff', cursor: h.cursor,
+        zIndex: 10, boxSizing: 'border-box', ...h.pos,
+      }}
+    />
+  ))
+}
+
+function LogoEl({ el, isSelected, onPointerDown, onResizeStart }) {
+  const m = el.logoMeta || {}
+  const opacity = (el.opacity ?? 100) / 100
+  // Scale 120×82 tile content uniformly to fit element bounds (letterbox)
+  const origW = 120, origH = 82
+  const scale = Math.min(el.width / origW, el.height / origH)
+  const tx = (el.width  - origW * scale) / 2
+  const ty = (el.height - origH * scale) / 2
+  return (
+    <div
+      style={{ ...elBase(el, isSelected), background: m.bg || '#444CE7', overflow: 'hidden', opacity }}
+      onPointerDown={onPointerDown}
+    >
+      <div style={{ position: 'absolute', left: tx, top: ty, width: origW, height: origH, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        {m.type === 'ipop'   && <_IpopLogo   {...m} />}
+        {m.type === 'solar'  && <_SolarLogo  {...m} />}
+        {m.type === 'planet' && <_PlanetLogo {...m} />}
+      </div>
+      {isSelected && <LogoResizeHandles onResizeStart={onResizeStart} />}
     </div>
   )
 }
@@ -328,14 +437,25 @@ export default function FreeCanvas({
     if (i.type === 'drag') {
       onUpdateElement(i.id, { x: Math.round(i.ox + dx), y: Math.round(i.oy + dy) })
 
-    // Element corner resize
+    // Element corner/midpoint resize
     } else if (i.type === 'resize') {
-      const { handle: h, ox, oy, ow, oh } = i
+      const { handle: h, ox, oy, ow, oh, proportional } = i
       let x = ox, y = oy, w = ow, ht = oh
-      if (h.includes('e')) w  = Math.max(32, ow + dx)
-      if (h.includes('s')) ht = Math.max(20, oh + dy)
-      if (h.includes('w')) { x = ox + dx; w  = Math.max(32, ow - dx) }
-      if (h.includes('n')) { y = oy + dy; ht = Math.max(20, oh - dy) }
+      const isCorner = ['nw','ne','se','sw'].includes(h)
+      if (proportional && isCorner) {
+        // Proportional resize: use the larger magnitude delta as the driver
+        const primary = Math.abs(dx) >= Math.abs(dy) ? dx : dy
+        const newW = Math.max(32, h.includes('w') ? ow - primary : ow + primary)
+        const newH = Math.max(20, newW / (ow / oh))
+        if (h.includes('w')) x = ox + (ow - newW)
+        if (h.includes('n')) y = oy + (oh - newH)
+        w = newW; ht = newH
+      } else {
+        if (h.includes('e')) w  = Math.max(32, ow + dx)
+        if (h.includes('s')) ht = Math.max(20, oh + dy)
+        if (h.includes('w')) { x = ox + dx; w  = Math.max(32, ow - dx) }
+        if (h.includes('n')) { y = oy + dy; ht = Math.max(20, oh - dy) }
+      }
       onUpdateElement(i.id, { x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(ht) })
 
     // Zone column boundary resize
@@ -456,7 +576,8 @@ export default function FreeCanvas({
           }
         }
         const onResizeStart = (e, handle) => {
-          ix.current = { type: 'resize', id: el.id, handle, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y, ow: el.width, oh: el.height }
+          const isCorner = ['nw','ne','se','sw'].includes(handle)
+          ix.current = { type: 'resize', id: el.id, handle, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y, ow: el.width, oh: el.height, proportional: el.type === 'logo' && isCorner }
         }
         const onDoubleClick = () => el.type === 'text' && onSetEditing(el.id)
         const onTextBlur    = (e) => onUpdateElement(el.id, { content: e.currentTarget.innerText })
