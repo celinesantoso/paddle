@@ -1,119 +1,369 @@
 import { useState } from 'react'
 
+// ─── QR Code SVG ────────────────────────────────────────────────────────────
+
 function QRPattern() {
-  // Simple visual QR code representation
-  const pattern = [
-    [1,1,1,1,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,1,0,1,1,0,1,1,0,1,0,0,0,1],
-    [1,0,1,1,1,0,1,0,0,1,1,0,0,0,1,0,1,1,1,0,1],
-    [1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,1],
-    [1,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,1],
-    [1,0,0,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1],
-  ]
+  // Finder patterns + data cells for a realistic QR look
+  const cells = []
+  for (let r = 0; r < 7; r++) {
+    for (let c = 0; c < 7; c++) {
+      // Outer ring
+      const onBorder = r === 0 || r === 6 || c === 0 || c === 6
+      // Inner square
+      const onInner = r >= 2 && r <= 4 && c >= 2 && c <= 4
+      if (onBorder || onInner) cells.push({ r, c })
+    }
+  }
+  // Add some data-region dots for visual fidelity
+  const data = [[0,4],[0,5],[0,6],[1,5],[2,3],[3,4],[4,0],[4,3],[5,1],[5,4],[6,2],[6,5]]
+  const allCells = [...cells, ...data]
   return (
-    <svg width="40" height="40" viewBox="0 0 7 7" shapeRendering="crispEdges">
-      {[0,1,2,3,4,5,6].map(row =>
-        [0,1,2,3,4,5,6].map(col => {
-          const val = (row < 3 && col < 3) || (row < 3 && col > 3) || (row > 3 && col < 3)
-            ? ((row % 2 === 0 || col % 2 === 0) ? 1 : 0)
-            : ((row + col) % 2)
-          return val ? (
-            <rect key={`${row}-${col}`} x={col} y={row} width="1" height="1" fill="#111827" />
-          ) : null
-        })
-      )}
+    <svg width="38" height="38" viewBox="0 0 9 9" shapeRendering="crispEdges">
+      {allCells.map(({ r, c }) => (
+        <rect key={`${r}-${c}`} x={c + 1} y={r + 1} width="1" height="1" fill="#111827" />
+      ))}
     </svg>
   )
 }
 
-function WidgetThumb({ label, children, onClick }) {
+// ─── Search Icon ─────────────────────────────────────────────────────────────
+
+function SearchIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="9.17" cy="9.17" r="5.42" stroke="var(--text-placeholder)" strokeWidth="1.5"/>
+      <path d="M13.33 13.33 16.67 16.67" stroke="var(--text-placeholder)" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+// ─── Globe Icon ──────────────────────────────────────────────────────────────
+
+function GlobeIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.5"/>
+      <path d="M12 3C12 3 9 7.5 9 12s3 9 3 9M12 3c0 0 3 4.5 3 9s-3 9-3 9M3 12h18" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+// ─── Widget Card ─────────────────────────────────────────────────────────────
+
+function WidgetCard({ label, onClick, children, previewStyle }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-1.5 hover:opacity-80 transition-opacity"
+      style={{
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-xl)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        background: 'var(--bg-primary)',
+        cursor: 'pointer',
+        textAlign: 'left',
+        padding: 0,
+        width: '100%',
+      }}
     >
+      {/* Preview area */}
       <div
-        className="w-full bg-white rounded-lg border border-gray-200 flex items-center justify-center"
-        style={{ aspectRatio: '16/9' }}
+        style={{
+          height: 82,
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-default)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          flexShrink: 0,
+          width: '100%',
+          ...previewStyle,
+        }}
       >
         {children}
       </div>
-      <span className="text-xs text-gray-600">{label}</span>
+      {/* Label */}
+      <div
+        style={{
+          paddingTop: 'var(--spacing-sm)',
+          paddingBottom: 'var(--spacing-lg)',
+          paddingLeft: 'var(--spacing-lg)',
+          paddingRight: 'var(--spacing-lg)',
+          width: '100%',
+        }}
+      >
+        <span
+          style={{
+            fontSize: 'var(--font-size-p4)',
+            lineHeight: 'var(--line-height-p4)',
+            fontWeight: 400,
+            color: 'var(--foreground-primary)',
+            display: 'block',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </span>
+      </div>
     </button>
   )
 }
 
+// ─── Section Label ────────────────────────────────────────────────────────────
+
+function SectionLabel({ children }) {
+  return (
+    <div style={{ paddingLeft: 'var(--spacing-lg)', paddingRight: 'var(--spacing-lg)', paddingTop: 'var(--spacing-xs)', paddingBottom: 'var(--spacing-xs)' }}>
+      <span
+        style={{
+          fontSize: 'var(--font-size-p3)',
+          lineHeight: 'var(--line-height-p3)',
+          fontWeight: 500,
+          color: 'var(--foreground-primary)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {children}
+      </span>
+    </div>
+  )
+}
+
+// ─── Widget Grid ──────────────────────────────────────────────────────────────
+
+function WidgetGrid({ children }) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: 10,
+        width: '100%',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+// ─── Date Preview ─────────────────────────────────────────────────────────────
+
+function DatePreview() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 'var(--radius-s)',
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-xs)',
+        width: 48,
+      }}
+    >
+      {/* Green accent bar */}
+      <div style={{ background: 'var(--color-secondary-300)', height: 4, flexShrink: 0 }} />
+      {/* Content */}
+      <div
+        style={{
+          background: 'var(--bg-primary)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 4,
+          height: 40,
+          padding: '0 4px',
+        }}
+      >
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--foreground-primary)', lineHeight: '14px', fontFamily: 'Inter, sans-serif', width: '100%', textAlign: 'center' }}>09</span>
+        <span style={{ fontSize: 7, fontWeight: 400, color: 'var(--foreground-quaternary)', lineHeight: '10px', width: '100%', textAlign: 'center' }}>Mar 26</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── YouTube Preview ──────────────────────────────────────────────────────────
+
+function YouTubePreview() {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        background: '#cc0000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+      }}
+    >
+      {/* YouTube wordmark style */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div
+          style={{
+            background: 'white',
+            borderRadius: 4,
+            width: 28,
+            height: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#cc0000">
+            <path d="M10 15l5.19-3L10 9v6z"/>
+          </svg>
+        </div>
+        <span style={{ color: 'white', fontWeight: 700, fontSize: 14, letterSpacing: -0.5 }}>YouTube</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── QR Preview Container ─────────────────────────────────────────────────────
+
+function QRPreview() {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-primary)',
+        borderRadius: 3,
+        width: 48,
+        height: 48,
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <QRPattern />
+    </div>
+  )
+}
+
+// ─── Main Export ─────────────────────────────────────────────────────────────
+
 export default function WidgetsPanel({ onAddElement }) {
   const [search, setSearch] = useState('')
 
-  const add = (name, w = 120, h = 100) => onAddElement({ type: 'widget', widgetName: name, width: w, height: h })
+  const add = (name, w = 120, h = 100) =>
+    onAddElement({ type: 'widget', widgetName: name, width: w, height: h })
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="relative">
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 20 20" fill="none">
-            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2"/>
-            <path d="M15 15l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-primary)' }}>
+      {/* Scrollable content */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: 'var(--spacing-2xl)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-4xl)',
+        }}
+      >
+        {/* Search field */}
+        <div
+          style={{
+            background: 'var(--surface-primary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-l)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--spacing-2xl)',
+            padding: '8px 12px',
+          }}
+        >
+          <SearchIcon />
           <input
             type="text"
             placeholder="Search widgets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontSize: 'var(--font-size-p3)',
+              lineHeight: 'var(--line-height-p3)',
+              fontWeight: 400,
+              color: 'var(--foreground-primary)',
+              fontFamily: 'inherit',
+            }}
           />
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-4">
         {/* Most Recent */}
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide py-2 border-b border-gray-100 mb-2">Most Recent</div>
-          <div className="grid grid-cols-2 gap-2">
-            <WidgetThumb label="QR Code" onClick={() => add('qr-code', 120, 120)}><QRPattern /></WidgetThumb>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', width: '100%' }}>
+          <SectionLabel>Most Recent</SectionLabel>
+          <WidgetGrid>
+            <WidgetCard label="QR Code" onClick={() => add('qr-code', 120, 120)}>
+              <QRPreview />
+            </WidgetCard>
+          </WidgetGrid>
         </div>
 
         {/* Source */}
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide py-2 border-b border-gray-100 mb-2">Source</div>
-          <div className="grid grid-cols-2 gap-2">
-            <WidgetThumb label="YouTube" onClick={() => add('youtube', 140, 90)}>
-              <div className="bg-red-600 rounded-lg w-10 h-7 flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M10 15l5.19-3L10 9v6z"/></svg>
-              </div>
-            </WidgetThumb>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', width: '100%' }}>
+          <SectionLabel>Source</SectionLabel>
+          <WidgetGrid>
+            <WidgetCard label="YouTube" onClick={() => add('youtube', 140, 90)} previewStyle={{ background: 'transparent', border: '1px solid var(--border-default)', padding: 0 }}>
+              <YouTubePreview />
+            </WidgetCard>
+          </WidgetGrid>
         </div>
 
         {/* Utilities */}
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide py-2 border-b border-gray-100 mb-2">Utilities</div>
-          <div className="grid grid-cols-2 gap-2">
-            <WidgetThumb label="QR Code" onClick={() => add('qr-code', 120, 120)}><QRPattern /></WidgetThumb>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', width: '100%', overflow: 'hidden' }}>
+          <SectionLabel>Utilities</SectionLabel>
+          <WidgetGrid>
+            <WidgetCard label="QR Code" onClick={() => add('qr-code', 120, 120)}>
+              <QRPreview />
+            </WidgetCard>
+            <WidgetCard label="Web Content" onClick={() => add('web-content', 280, 200)}>
+              <div
+                style={{
+                  background: 'var(--color-orange-500)',
+                  borderRadius: 8,
+                  padding: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <GlobeIcon />
+              </div>
+            </WidgetCard>
+          </WidgetGrid>
         </div>
 
         {/* Time */}
-        <div>
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide py-2 border-b border-gray-100 mb-2">Time</div>
-          <div className="grid grid-cols-2 gap-2">
-            <WidgetThumb label="Date" onClick={() => add('date', 220, 50)}>
-              <div className="bg-white border border-gray-100 rounded px-2 py-1 text-center">
-                <span className="text-xs font-medium text-gray-700 whitespace-nowrap">
-                  {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                </span>
-              </div>
-            </WidgetThumb>
-            <WidgetThumb label="Digital Clock" onClick={() => add('clock', 180, 50)}>
-              <div className="bg-gray-900 rounded px-2 py-1">
-                <span className="text-xs font-mono font-bold text-green-400 tracking-widest">00:00:00</span>
-              </div>
-            </WidgetThumb>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', width: '100%' }}>
+          <SectionLabel>Time</SectionLabel>
+          <WidgetGrid>
+            <WidgetCard label="Date" onClick={() => add('date', 220, 50)}>
+              <DatePreview />
+            </WidgetCard>
+            <WidgetCard label="Digital Clock" onClick={() => add('clock', 180, 50)}>
+              <span
+                style={{
+                  fontFamily: "'Chivo Mono', monospace",
+                  fontWeight: 500,
+                  fontSize: 'var(--font-size-p3)',
+                  lineHeight: 'var(--line-height-p3)',
+                  color: '#000000',
+                  letterSpacing: 0,
+                }}
+              >
+                00:00:00
+              </span>
+            </WidgetCard>
+          </WidgetGrid>
         </div>
       </div>
     </div>
