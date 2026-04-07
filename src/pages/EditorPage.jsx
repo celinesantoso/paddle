@@ -263,158 +263,221 @@ function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setP
   )
 }
 
-function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement, onDeleteElement, onBringForward, onSendBackward,
-  selectedZoneId, zoneStyle, onUpdateZoneStyle }) {
-  const [rightTab, setRightTab]             = useState('design')
-  const [dimsOpen, setDimsOpen]             = useState(true)
-  const [bgOpen, setBgOpen]                 = useState(true)
+function RightPanel({
+  bgColor,
+  onBgColorChange,
+  selectedElement,
+  onUpdateElement,
+  onDeleteElement,
+  onBringForward,
+  onSendBackward,
+  selectedZoneId,
+  zoneStyle,
+  onUpdateZoneStyle
+}) {
+  const [rightTab, setRightTab] = useState('design')
+  const [dimsOpen, setDimsOpen] = useState(true)
+  const [bgOpen, setBgOpen] = useState(true)
   const [appearanceOpen, setAppearanceOpen] = useState(true)
-  const [layersOpen, setLayersOpen]         = useState(false)
+  const [layersOpen, setLayersOpen] = useState(false)
   const [presDetailsOpen, setPresDetailsOpen] = useState(true)
-  const [presName, setPresName]             = useState('')
-  const [pages, setPages]                   = useState([{ id: 1, name: '', duration: '' }])
+  const [presName, setPresName] = useState('')
+  const [pages, setPages] = useState([{ id: 1, name: '', duration: '' }])
 
   const panelStyle = { width: 320, borderLeft: '1px solid #E9EAEB', background: '#FFFFFF' }
 
-  // ── Design tokens ────────────────────────────────────────────────────────
-  // All values sourced from Figma local variables (Working-Prototype file)
   const DS = {
-    bgPrimary:    '#FFFFFF',   // background/primary
-    bgPage:       '#FAFAFA',   // background/page
-    bgHover:      '#F5F5F5',   // background/primary-hover
-    borderDefault:'#E9EAEB',   // border/default
-    borderPrimary:'#D5D7DA',   // border/primary
-    fgPrimary:    '#0A0D12',   // foreground/primary
-    fgQuaternary: '#717680',   // foreground/quaternary
-    radiusXl:     10,          // border/radius/xl
-    radiusL:      8,           // border/radius/l
-    radiusSm:     4,           // border/radius/sm
-    shadow:       '0px 1px 2px 0px rgba(10,13,18,0.05)',  // shadow/xs
+    bgPrimary: '#FFFFFF',
+    bgPage: '#FAFAFA',
+    bgHover: '#F5F5F5',
+    borderDefault: '#E9EAEB',
+    borderPrimary: '#D5D7DA',
+    fgPrimary: '#0A0D12',
+    fgQuaternary: '#717680',
+    radiusXl: 10,
+    radiusL: 8,
+    radiusSm: 4,
+    shadow: '0px 1px 2px 0px rgba(10,13,18,0.05)',
   }
 
-  // Map hex → Figma color token name (for Border color display)
   const COLOR_TOKEN = {
     '#FFFFFF': 'Neutral/White', '#ffffff': 'Neutral/White',
-    '#F5F5F5': 'Neutral/100',  '#f5f5f5': 'Neutral/100',
-    '#E9EAEB': 'Neutral/200',  '#D5D7DA': 'Neutral/300',
-    '#0A0D12': 'Neutral/950',  '#000000': 'Neutral/Black',
+    '#F5F5F5': 'Neutral/100', '#f5f5f5': 'Neutral/100',
+    '#E9EAEB': 'Neutral/200', '#D5D7DA': 'Neutral/300',
+    '#0A0D12': 'Neutral/950', '#000000': 'Neutral/Black',
   }
-  const colorTokenName = (hex) => COLOR_TOKEN[hex] ?? COLOR_TOKEN[hex?.toUpperCase()] ?? (hex ?? '').replace('#', '').toUpperCase()
 
-  // ── Shared style objects (Body/m-medium + Body/m text styles from Figma) ──
-  const bodyMMedium = { fontSize: 16, lineHeight: '24px', fontWeight: 500, color: DS.fgPrimary }   // Body/m-medium
-  const bodyM       = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgPrimary }   // Body/m
-  const bodyMQuart  = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgQuaternary }// Body/m quaternary
+  const colorTokenName = (hex) =>
+    COLOR_TOKEN[hex] ??
+    COLOR_TOKEN[hex?.toUpperCase()] ??
+    (hex ?? '').replace('#', '').toUpperCase()
+
+  const bodyMMedium = { fontSize: 16, lineHeight: '24px', fontWeight: 500, color: DS.fgPrimary }
+  const bodyM = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgPrimary }
+  const bodyMQuart = { fontSize: 16, lineHeight: '24px', fontWeight: 400, color: DS.fgQuaternary }
   const bodyMMedQuart = { fontSize: 16, lineHeight: '24px', fontWeight: 500, color: DS.fgQuaternary }
 
-  // Select input with shadow (bg/primary): for border color + dropdowns
   const propInputPrimary = {
-    background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
-    borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px',
-    display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden',
+    background: DS.bgPrimary,
+    border: `1px solid ${DS.borderPrimary}`,
+    borderRadius: DS.radiusXl,
+    padding: '8px 14px 8px 8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    overflow: 'hidden',
     boxShadow: DS.shadow,
   }
-  // Native number input sitting inside a propInput box
+
   const numInputInner = {
-    flex: 1, background: 'transparent', border: 'none', outline: 'none',
-    ...bodyMMedium, minWidth: 0,
-  }
-  // Icon button container (Property/Grouping/Icon Button: 24x24, p:4, radius:8)
-  const iconBtn = {
-    width: 24, height: 24, flexShrink: 0, display: 'flex',
-    alignItems: 'center', justifyContent: 'center',
-    padding: 4, borderRadius: DS.radiusL,
-  }
-  // Flat icon button (no bg) for section header actions
-  const iconBtnFlat = {
-    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-    color: DS.fgQuaternary, display: 'flex', alignItems: 'center',
+    flex: 1,
+    background: 'transparent',
+    border: 'none',
+    outline: 'none',
+    ...bodyMMedium,
+    minWidth: 0,
   }
 
-  // ── Inline SVG icons (matching Figma icon names) ─────────────────────────
-  // corner-radius (approximates the rounded-corner indicator icon)
+  const iconBtn = {
+    width: 24,
+    height: 24,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
+    borderRadius: DS.radiusL,
+  }
+
+  const iconBtnFlat = {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    color: DS.fgQuaternary,
+    display: 'flex',
+    alignItems: 'center',
+  }
+
   const IconRadius = () => (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M3 13V8C3 5.239 5.239 3 8 3H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-  // opacity / checkerboard
-  const IconOpacity = () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="2" y="2" width="5" height="5" fill={DS.borderDefault}/>
-      <rect x="9" y="2" width="5" height="5" fill={DS.borderPrimary}/>
-      <rect x="2" y="9" width="5" height="5" fill={DS.borderPrimary}/>
-      <rect x="9" y="9" width="5" height="5" fill={DS.borderDefault}/>
-      <rect x="2" y="2" width="12" height="12" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.25"/>
-    </svg>
-  )
-  // eye (for Fill / Border section headers)
-  const IconEye = () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M1.5 8C1.5 8 4 3.5 8 3.5C12 3.5 14.5 8 14.5 8C14.5 8 12 12.5 8 12.5C4 12.5 1.5 8 1.5 8Z" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinejoin="round"/>
-      <circle cx="8" cy="8" r="2" stroke={DS.fgQuaternary} strokeWidth="1.25"/>
-    </svg>
-  )
-  // minus (for Fill / Border section headers)
-  const IconMinus = () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M3 8H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-  // align-vertical-space-around = stacked lines (border weight)
-  const IconBorderWidth = () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M2 4H14" stroke={DS.fgQuaternary} strokeWidth="2"    strokeLinecap="round"/>
-      <path d="M2 8H14" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinecap="round"/>
-      <path d="M2 12H14" stroke={DS.fgQuaternary} strokeWidth="0.75" strokeLinecap="round"/>
-    </svg>
-  )
-  // chevron-down (for dropdowns, 20px viewBox to match Figma)
-  const IconChevronDown = () => (
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M5 8l5 5 5-5" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-  // minus icon (small, for Solid border style option)
-  const IconMinusSm = () => (
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M4 10H16" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-  // square icon (small, for All sides option)
-  const IconSquareSm = () => (
-    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-      <rect x="3" y="3" width="14" height="14" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.5"/>
+      <path d="M3 13V8C3 5.239 5.239 3 8 3H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 
-  // Styled select dropdown matching Figma "Select" component
-  // (border/primary, radius/xl, shadow/xs, appearance:none + custom chevron)
+  const IconOpacity = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="2" width="5" height="5" fill={DS.borderDefault} />
+      <rect x="9" y="2" width="5" height="5" fill={DS.borderPrimary} />
+      <rect x="2" y="9" width="5" height="5" fill={DS.borderPrimary} />
+      <rect x="9" y="9" width="5" height="5" fill={DS.borderDefault} />
+      <rect x="2" y="2" width="12" height="12" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.25" />
+    </svg>
+  )
+
+  const IconEye = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M1.5 8C1.5 8 4 3.5 8 3.5C12 3.5 14.5 8 14.5 8C14.5 8 12 12.5 8 12.5C4 12.5 1.5 8 1.5 8Z" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinejoin="round" />
+      <circle cx="8" cy="8" r="2" stroke={DS.fgQuaternary} strokeWidth="1.25" />
+    </svg>
+  )
+
+  const IconMinus = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M3 8H13" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+
+  const IconBorderWidth = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 4H14" stroke={DS.fgQuaternary} strokeWidth="2" strokeLinecap="round" />
+      <path d="M2 8H14" stroke={DS.fgQuaternary} strokeWidth="1.25" strokeLinecap="round" />
+      <path d="M2 12H14" stroke={DS.fgQuaternary} strokeWidth="0.75" strokeLinecap="round" />
+    </svg>
+  )
+
+  const IconChevronDown = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M5 8l5 5 5-5" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+
+  const IconMinusSm = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <path d="M4 10H16" stroke={DS.fgQuaternary} strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+
+  const IconSquareSm = () => (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+      <rect x="3" y="3" width="14" height="14" rx="1.5" stroke={DS.fgQuaternary} strokeWidth="1.5" />
+    </svg>
+  )
+
   function StyledSelect({ value, onChange, options, leadingIcon, style: extraStyle }) {
     return (
-      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', ...propInputPrimary, padding: '8px 14px', ...extraStyle }}>
-        {leadingIcon && <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', marginRight: 2 }}>{leadingIcon}</span>}
+      <div
+        style={{
+          flex: 1,
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          ...propInputPrimary,
+          padding: '8px 14px',
+          ...extraStyle
+        }}
+      >
+        {leadingIcon && (
+          <span style={{ flexShrink: 0, display: 'flex', alignItems: 'center', marginRight: 2 }}>
+            {leadingIcon}
+          </span>
+        )}
         <select
           value={value}
           onChange={onChange}
           style={{
-            flex: 1, appearance: 'none', background: 'transparent', border: 'none', outline: 'none',
-            ...bodyMMedium, paddingRight: 16, cursor: 'pointer', minWidth: 0,
+            flex: 1,
+            appearance: 'none',
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            ...bodyMMedium,
+            paddingRight: 16,
+            cursor: 'pointer',
+            minWidth: 0,
           }}
         >
-          {options.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+          {options.map(([val, label]) => (
+            <option key={val} value={val}>{label}</option>
+          ))}
         </select>
-        <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
+        <span
+          style={{
+            position: 'absolute',
+            right: 10,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none',
+            display: 'flex'
+          }}
+        >
           <IconChevronDown />
         </span>
       </div>
     )
   }
 
-  // Section header for Fill / Border: label on left, eye + minus on right
   function FillBorderHeader({ label }) {
     return (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          borderTop: `1px solid ${DS.borderDefault}`,
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
         <span style={bodyM}>{label}</span>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <button style={iconBtnFlat}><IconEye /></button>
@@ -424,53 +487,108 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
     )
   }
 
-  // ── Element properties panel (shown when an element is selected) ──────────
-  // ── Logo element properties panel ────────────────────────────────────────
-  if (selectedElement?.type === 'logo') {
+  const renderTabBar = () => (
+    <div style={{ padding: '12px 20px 20px', borderBottom: '1px solid #E9EAEB' }}>
+      <div
+        className="flex gap-2"
+        style={{ background: '#FFFFFF', padding: 4, borderRadius: 12, border: '1px solid #E9EAEB' }}
+      >
+        {[{ id: 'design', label: 'Design' }, { id: 'presentation', label: 'Presentation' }].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setRightTab(t.id)}
+            className="flex-1 transition-colors"
+            style={{
+              padding: '6px 12px',
+              borderRadius: 8,
+              background: rightTab === t.id ? '#F5F5F5' : 'transparent',
+              fontSize: 14,
+              fontWeight: rightTab === t.id ? 500 : 400,
+              color: rightTab === t.id ? '#0A0D12' : '#717680',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+
+  const renderPresentationPanel = () => (
+    <PresentationPanel
+      presDetailsOpen={presDetailsOpen}
+      setPresDetailsOpen={setPresDetailsOpen}
+      presName={presName}
+      setPresName={setPresName}
+      pages={pages}
+      setPages={setPages}
+      DS={DS}
+      bodyM={bodyM}
+      bodyMMedium={bodyMMedium}
+      bodyMMedQuart={bodyMMedQuart}
+      SectionHeader={SectionHeader}
+    />
+  )
+
+  const renderLogoDesignPanel = () => {
+    if (selectedElement?.type !== 'logo') return null
+
     const el = selectedElement
-    const m  = el.logoMeta || {}
+    const m = el.logoMeta || {}
     const opacity = el.opacity ?? 100
 
-    // Figma asset URLs (node 1921:80762)
-    const _v2  = 'https://www.figma.com/api/mcp/asset/13ba673c-5fa1-41a4-bf2a-8384806b1422' // align-start-horizontal
-    const _v3  = 'https://www.figma.com/api/mcp/asset/53c67ef5-8238-4e2f-8476-4b5ee6fbc226' // align-center-horizontal
-    const _v4  = 'https://www.figma.com/api/mcp/asset/6c1b6171-0aa0-49e9-b758-724400cf0853' // align-end-horizontal
-    const _v5  = 'https://www.figma.com/api/mcp/asset/577753b3-e2d8-4592-8418-f6a37328b8ca' // align-start-vertical
-    const _v6  = 'https://www.figma.com/api/mcp/asset/dea19023-d3ef-4a35-b0b4-075958f557c5' // align-center-vertical
-    const _v7  = 'https://www.figma.com/api/mcp/asset/3ad2b7e7-6a1e-44ae-bf56-3fcf3b4e8a7d' // align-end-vertical
-    const _sq  = 'https://www.figma.com/api/mcp/asset/8f215aa1-e3bd-41ac-9c74-5e78a5750738' // square-play (radius)
-    const _sq1 = 'https://www.figma.com/api/mcp/asset/abfb243b-b2c0-4708-ae6c-6d4fa1fae54a' // square-play1 (opacity)
-    const _vol = 'https://www.figma.com/api/mcp/asset/144ae2a7-1d07-4e5c-bd76-411004630bb3' // volume-2 (rotate)
-    const _g28 = 'https://www.figma.com/api/mcp/asset/bf646124-389a-4b59-a5e3-cf5f62ad126d' // flip arrow (rotated 45°)
-    const _fvH = 'https://www.figma.com/api/mcp/asset/0cd55f59-e129-450a-80f4-f417263eb1bf' // flip-horizontal
-    const _fvV = 'https://www.figma.com/api/mcp/asset/419f526a-1d83-416c-a0a7-a52ed8341763' // flip-vertical
-    const _sun = 'https://www.figma.com/api/mcp/asset/74a92172-8d73-4362-9f38-0024c04a4581' // sun-dim (spread)
-    const _v12 = 'https://www.figma.com/api/mcp/asset/ea8451c8-ca6d-42ea-866b-f5d8797f75dd' // plus (border)
-    const _v10 = 'https://www.figma.com/api/mcp/asset/2bf73a33-cfd5-4c26-af49-a4e817d78f87' // eye
-    const _v11 = 'https://www.figma.com/api/mcp/asset/5c1a9459-372e-4df5-9b18-fe68f9524c3e' // minus
+    const _v2 = 'https://www.figma.com/api/mcp/asset/13ba673c-5fa1-41a4-bf2a-8384806b1422'
+    const _v3 = 'https://www.figma.com/api/mcp/asset/53c67ef5-8238-4e2f-8476-4b5ee6fbc226'
+    const _v4 = 'https://www.figma.com/api/mcp/asset/6c1b6171-0aa0-49e9-b758-724400cf0853'
+    const _v5 = 'https://www.figma.com/api/mcp/asset/577753b3-e2d8-4592-8418-f6a37328b8ca'
+    const _v6 = 'https://www.figma.com/api/mcp/asset/dea19023-d3ef-4a35-b0b4-075958f557c5'
+    const _v7 = 'https://www.figma.com/api/mcp/asset/3ad2b7e7-6a1e-44ae-bf56-3fcf3b4e8a7d'
+    const _sq = 'https://www.figma.com/api/mcp/asset/8f215aa1-e3bd-41ac-9c74-5e78a5750738'
+    const _sq1 = 'https://www.figma.com/api/mcp/asset/abfb243b-b2c0-4708-ae6c-6d4fa1fae54a'
+    const _vol = 'https://www.figma.com/api/mcp/asset/144ae2a7-1d07-4e5c-bd76-411004630bb3'
+    const _g28 = 'https://www.figma.com/api/mcp/asset/bf646124-389a-4b59-a5e3-cf5f62ad126d'
+    const _fvH = 'https://www.figma.com/api/mcp/asset/0cd55f59-e129-450a-80f4-f417263eb1bf'
+    const _fvV = 'https://www.figma.com/api/mcp/asset/419f526a-1d83-416c-a0a7-a52ed8341763'
+    const _sun = 'https://www.figma.com/api/mcp/asset/74a92172-8d73-4362-9f38-0024c04a4581'
+    const _v12 = 'https://www.figma.com/api/mcp/asset/ea8451c8-ca6d-42ea-866b-f5d8797f75dd'
+    const _v10 = 'https://www.figma.com/api/mcp/asset/2bf73a33-cfd5-4c26-af49-a4e817d78f87'
+    const _v11 = 'https://www.figma.com/api/mcp/asset/5c1a9459-372e-4df5-9b18-fe68f9524c3e'
 
-    // bg/page input field (used for most property inputs)
     const selIn = {
-      background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`,
-      borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px',
-      display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', height: 40,
+      background: DS.bgPage,
+      border: `1px solid ${DS.borderPrimary}`,
+      borderRadius: DS.radiusXl,
+      padding: '8px 14px 8px 8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      overflow: 'hidden',
+      height: 40,
     }
 
-    // Skeumorphic shadow for selected state buttons
     const skeuShadow = `inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), ${DS.shadow}`
 
-    // 3-button alignment pill group; selectedIdx is the initially-selected button
     const AlignGroup = ({ icons }) => (
       <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl }}>
         {icons.map((src, i) => (
-          <button key={i} style={{
-            flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: i === 0 ? DS.bgPrimary : 'transparent',
-            border: i === 0 ? `1px solid ${DS.borderPrimary}` : 'none',
-            borderRadius: i === 0 ? DS.radiusXl : 0,
-            cursor: 'pointer', padding: 0,
-            boxShadow: i === 0 ? skeuShadow : 'none',
-          }}>
+          <button
+            key={i}
+            style={{
+              flex: 1,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: i === 0 ? DS.bgPrimary : 'transparent',
+              border: i === 0 ? `1px solid ${DS.borderPrimary}` : 'none',
+              borderRadius: i === 0 ? DS.radiusXl : 0,
+              cursor: 'pointer',
+              padding: 0,
+              boxShadow: i === 0 ? skeuShadow : 'none',
+            }}
+          >
             <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', inset: '8.33%' }}>
                 <div style={{ position: 'absolute', inset: '-3.33%' }}>
@@ -483,7 +601,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
       </div>
     )
 
-    // Row: 70px label + flex-1 input
     const LRow = ({ label, invisible, children }) => (
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
         <span style={{ width: 70, flexShrink: 0, ...bodyMMedQuart, opacity: invisible ? 0 : 1 }}>{label}</span>
@@ -491,7 +608,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
       </div>
     )
 
-    // FillBorderHeader variant with eye + minus icons (Figma images)
     const ImgFillHeader = ({ label }) => (
       <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={bodyM}>{label}</span>
@@ -519,33 +635,14 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
     )
 
     return (
-      <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
-
-        {/* Tab bar: Design / Presentation */}
-        <div style={{ padding: '20px', borderBottom: `1px solid ${DS.borderDefault}` }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[['design', 'Design'], ['presentation', 'Presentation']].map(([id, label]) => (
-              <button key={id} onClick={() => setRightTab(id)} style={{
-                flex: 1, padding: '6px 10px', borderRadius: DS.radiusXl,
-                border: 'none', cursor: 'pointer',
-                background: rightTab === id ? DS.bgHover : 'transparent',
-                ...bodyMMedium, color: rightTab === id ? DS.fgPrimary : DS.fgQuaternary,
-              }}>{label}</button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Position ───────────────────────────────────────────────────── */}
+      <>
         <SectionHeader label="Position" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-
-          {/* Vertical + Horizontal alignment groups */}
           <div style={{ display: 'flex', gap: 8 }}>
             <AlignGroup icons={[_v5, _v6, _v7]} />
             <AlignGroup icons={[_v2, _v3, _v4]} />
           </div>
 
-          {/* X / Y inputs */}
           <div style={{ display: 'flex', gap: 8 }}>
             {[['X', el.x, (v) => onUpdateElement(el.id, { x: v })], ['Y', el.y, (v) => onUpdateElement(el.id, { y: v })]].map(([label, val, onChange]) => (
               <div key={label} style={{ flex: 1, ...selIn }}>
@@ -553,7 +650,8 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
                   <span style={{ ...bodyMQuart, fontSize: 16 }}>{label}</span>
                 </div>
                 <input
-                  type="number" value={Math.round(val)}
+                  type="number"
+                  value={Math.round(val)}
                   onChange={(e) => onChange(Number(e.target.value))}
                   style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0 }}
                 />
@@ -561,31 +659,37 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
             ))}
           </div>
 
-          {/* Rotate input + Flip group */}
           <div style={{ display: 'flex', gap: 8 }}>
-            {/* Rotate */}
             <div style={{ flex: 1, ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, position: 'relative' }}>
                 <img alt="" src={_vol} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
               </div>
               <span style={bodyMMedium}>0°</span>
             </div>
-            {/* Flip: 3-button pill (bg/secondary) */}
+
             <div style={{ flex: 1, display: 'flex', background: '#F5F5F5', border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl }}>
-              {/* Selected: rotated flip arrow */}
-              <button style={{
-                flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
-                borderRadius: DS.radiusXl, cursor: 'pointer', padding: 0,
-                boxShadow: skeuShadow,
-              }}>
+              <button
+                style={{
+                  flex: 1,
+                  height: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: DS.bgPrimary,
+                  border: `1px solid ${DS.borderPrimary}`,
+                  borderRadius: DS.radiusXl,
+                  cursor: 'pointer',
+                  padding: 0,
+                  boxShadow: skeuShadow,
+                }}
+              >
                 <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ transform: 'rotate(45deg)', width: 18.29, height: 16.29, position: 'relative' }}>
                     <img alt="" src={_g28} style={{ position: 'absolute', inset: '-3.62% 0 0 -4.08%', width: '107%', height: '107%', display: 'block', maxWidth: 'none' }} />
                   </div>
                 </div>
               </button>
-              {/* flip-H */}
+
               <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
                 <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
                   <div style={{ position: 'absolute', inset: '8.33% 12.5%' }}>
@@ -595,7 +699,7 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
                   </div>
                 </div>
               </button>
-              {/* flip-V */}
+
               <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
                 <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
                   <div style={{ position: 'absolute', inset: '12.5% 8.33%' }}>
@@ -609,10 +713,8 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </div>
         </div>
 
-        {/* ── Appearance ─────────────────────────────────────────────────── */}
         <SectionHeader label="Appearance" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* Radius */}
           <LRow label="Radius">
             <div style={{ ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, padding: 4, borderRadius: DS.radiusL, position: 'relative' }}>
@@ -621,14 +723,17 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
               <span style={{ ...bodyMMedium }}>12</span>
             </div>
           </LRow>
-          {/* Opacity — interactive */}
+
           <LRow label="Opacity">
             <div style={{ ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, padding: 4, borderRadius: DS.radiusL, position: 'relative' }}>
                 <img alt="" src={_sq1} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
               </div>
               <input
-                type="number" min={0} max={100} value={opacity}
+                type="number"
+                min={0}
+                max={100}
+                value={opacity}
                 onChange={(e) => onUpdateElement(el.id, { opacity: Math.max(0, Math.min(100, Number(e.target.value))) })}
                 style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0 }}
               />
@@ -637,21 +742,26 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </LRow>
         </div>
 
-        {/* ── Fill ───────────────────────────────────────────────────────── */}
         <ImgFillHeader label="Fill" />
         <div style={{ padding: '0 20px 20px' }}>
-          <div style={{
-            background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`,
-            borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px',
-            display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden',
-            boxShadow: DS.shadow,
-          }}>
+          <div
+            style={{
+              background: DS.bgPrimary,
+              border: `1px solid ${DS.borderPrimary}`,
+              borderRadius: DS.radiusXl,
+              padding: '8px 14px 8px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              overflow: 'hidden',
+              boxShadow: DS.shadow,
+            }}
+          >
             <div style={{ width: 24, height: 24, borderRadius: 4, background: m.bg || '#444CE7', border: `1px solid ${DS.borderPrimary}`, flexShrink: 0 }} />
             <span style={{ ...bodyMMedium, flex: 1 }}>Primary/600</span>
           </div>
         </div>
 
-        {/* ── Border (header only, no content) ───────────────────────────── */}
         <div style={{ borderTop: `1px solid ${DS.borderDefault}`, borderBottom: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={bodyM}>Border</span>
           <button style={iconBtnFlat}>
@@ -665,10 +775,8 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </button>
         </div>
 
-        {/* ── Drop Shadow ─────────────────────────────────────────────────── */}
         <ImgFillHeader label="Drop Shadow" />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* Position X */}
           <LRow label="Position">
             <div style={{ ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>
@@ -677,7 +785,7 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
               <span style={{ ...bodyMMedium, flex: 1 }}>12</span>
             </div>
           </LRow>
-          {/* Position Y (invisible label) */}
+
           <LRow label="Position" invisible>
             <div style={{ ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>
@@ -686,12 +794,11 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
               <span style={{ ...bodyMMedium, flex: 1 }}>16</span>
             </div>
           </LRow>
-          {/* Blur */}
+
           <LRow label="Blur">
             <div style={{ ...selIn }}>
-              {/* blur dot-grid icon */}
               <div style={{ width: 20, height: 20, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {[[1.33,2,1.33],[2,2,2],[1.33,2,1.33]].map((row, ri) => (
+                {[[1.33, 2, 1.33], [2, 2, 2], [1.33, 2, 1.33]].map((row, ri) => (
                   <div key={ri} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                     {row.map((sz, ci) => (
                       <div key={ci} style={{ width: sz, height: sz, borderRadius: 10, background: DS.fgQuaternary, flexShrink: 0 }} />
@@ -703,7 +810,7 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
               <span style={{ ...bodyMQuart, flexShrink: 0 }}>%</span>
             </div>
           </LRow>
-          {/* Spread */}
+
           <LRow label="Spread">
             <div style={{ ...selIn }}>
               <div style={{ width: 24, height: 24, flexShrink: 0, padding: 4, borderRadius: DS.radiusL, position: 'relative' }}>
@@ -713,12 +820,12 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
               <span style={{ ...bodyMQuart, flexShrink: 0 }}>%</span>
             </div>
           </LRow>
-          {/* Color */}
+
           <LRow label="Color">
             <div style={{ ...selIn }}>
               <div style={{ width: 20, height: 20, borderRadius: 4, background: '#0A0D12', border: `1px solid ${DS.borderPrimary}`, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', right: 0, top: -1, width: 10, bottom: 0, background: '#535862' }}>
-                  {[[0,2],[2,0],[4,2],[6,0],[8,2]].map(([t,l], i) => (
+                  {[[0, 2], [2, 0], [4, 2], [6, 0], [8, 2]].map(([t, l], i) => (
                     <div key={i} style={{ position: 'absolute', width: 2, height: 2, background: '#A4A7AE', top: t, left: l }} />
                   ))}
                 </div>
@@ -729,7 +836,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </LRow>
         </div>
 
-        {/* Delete */}
         <div style={{ padding: '16px 20px 20px', borderTop: `1px solid ${DS.borderDefault}` }}>
           <button
             onClick={() => onDeleteElement(el.id)}
@@ -738,23 +844,23 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
             Delete logo
           </button>
         </div>
-      </div>
+      </>
     )
   }
 
-  // ── Generic element properties panel (rect, text, image, widget) ──────────
-  if (selectedElement) {
+  const renderSelectedElementDesignPanel = () => {
+    if (!selectedElement || selectedElement.type === 'logo') return null
+
     const el = selectedElement
     const typeLabel = EL_TYPE_LABEL[el.type] || 'Element'
+
     return (
-      <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
-        {/* Header */}
+      <>
         <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid #E9EAEB' }}>
           <div style={{ fontSize: 13, color: '#717680', marginBottom: 2 }}>Selected</div>
           <div style={{ fontSize: 16, fontWeight: 500, color: '#0A0D12' }}>{typeLabel}</div>
         </div>
 
-        {/* Position */}
         <SectionHeader label="Position" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
@@ -767,12 +873,11 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </div>
         </div>
 
-        {/* Size */}
         <SectionHeader label="Size" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 16px', display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 12, color: '#717680', marginBottom: 6 }}>W</div>
-            <NumInput value={el.width}  onChange={(v) => onUpdateElement(el.id, { width: Math.max(1, v) })}  unit="px" />
+            <NumInput value={el.width} onChange={(v) => onUpdateElement(el.id, { width: Math.max(1, v) })} unit="px" />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 12, color: '#717680', marginBottom: 6 }}>H</div>
@@ -780,7 +885,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </div>
         </div>
 
-        {/* Style — rect fill */}
         {el.type === 'rect' && (
           <>
             <SectionHeader label="Fill" open={true} onToggle={() => {}} />
@@ -801,7 +905,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </>
         )}
 
-        {/* Style — text */}
         {el.type === 'text' && (
           <>
             <SectionHeader label="Text" open={true} onToggle={() => {}} />
@@ -825,7 +928,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </>
         )}
 
-        {/* Layer controls */}
         <SectionHeader label="Layer" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 16px', display: 'flex', gap: 8 }}>
           <button
@@ -842,7 +944,6 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
           </button>
         </div>
 
-        {/* Delete */}
         <div style={{ padding: '0 20px 20px' }}>
           <button
             onClick={() => onDeleteElement(el.id)}
@@ -851,23 +952,23 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
             Delete element
           </button>
         </div>
-      </div>
+      </>
     )
   }
 
-  // ── Zone properties panel ────────────────────────────────────────────────
-  if (selectedZoneId && !selectedElement) {
-    const fill        = zoneStyle.fill          ?? '#F5F5F5'
-    const fillOpacity = zoneStyle.fillOpacity   ?? 100
-    const opacity     = zoneStyle.opacity       ?? 100
-    const radius      = zoneStyle.borderRadius  ?? 0
-    const bColor      = zoneStyle.borderColor   ?? '#FFFFFF'
-    const bPos        = zoneStyle.borderPosition ?? 'inside'
-    const bWidth      = zoneStyle.borderWidth   ?? 1
-    const bStyle      = zoneStyle.borderStyle   ?? 'solid'
-    const bSides      = zoneStyle.borderSides   ?? 'all'
+  const renderZoneDesignPanel = () => {
+    if (!selectedZoneId || selectedElement) return null
 
-    // Row layout: 70px Body/m-medium quaternary label + flex-1 input
+    const fill = zoneStyle.fill ?? '#F5F5F5'
+    const fillOpacity = zoneStyle.fillOpacity ?? 100
+    const opacity = zoneStyle.opacity ?? 100
+    const radius = zoneStyle.borderRadius ?? 0
+    const bColor = zoneStyle.borderColor ?? '#FFFFFF'
+    const bPos = zoneStyle.borderPosition ?? 'inside'
+    const bWidth = zoneStyle.borderWidth ?? 1
+    const bStyle = zoneStyle.borderStyle ?? 'solid'
+    const bSides = zoneStyle.borderSides ?? 'all'
+
     const Row = ({ label, children }) => (
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%', minWidth: 0 }}>
         <span style={{ width: 70, flexShrink: 0, ...bodyMMedQuart }}>{label}</span>
@@ -876,224 +977,171 @@ function RightPanel({ bgColor, onBgColorChange, selectedElement, onUpdateElement
     )
 
     return (
-      <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
+      <>
+        <SectionHeader label="Appearance" open={appearanceOpen} onToggle={() => setAppearanceOpen(!appearanceOpen)} />
+        {appearanceOpen && (
+          <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Row label="Radius">
+              <div style={{ ...propInputPrimary, minWidth: 0 }}>
+                <span style={iconBtn}><IconRadius /></span>
+                <input
+                  type="number"
+                  value={Math.round(radius)}
+                  onChange={(e) => onUpdateZoneStyle({ borderRadius: Math.max(0, Number(e.target.value)) })}
+                  style={{ ...numInputInner, width: 0 }}
+                />
+              </div>
+            </Row>
 
-        {/* ── Tab bar: Design / Presentation ─────────────────────────────
-            Figma: .navDropdown — px:20 pb:20 pt:20, border-bottom, two PanelTabs flex-1
-            PanelTabs selected: bg/primary-hover, radius/xl, px:10 py:6, Body/m-medium     */}
-        <div style={{ padding: '20px 20px 20px', borderBottom: `1px solid ${DS.borderDefault}` }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[['design', 'Design'], ['presentation', 'Presentation']].map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setRightTab(id)}
-                style={{
-                  flex: 1, padding: '6px 10px', borderRadius: DS.radiusXl,
-                  border: 'none', cursor: 'pointer',
-                  background: rightTab === id ? DS.bgHover : 'transparent',
-                  ...bodyMMedium,
-                  color: rightTab === id ? DS.fgPrimary : DS.fgQuaternary,
-                }}
-              >{label}</button>
-            ))}
+            <Row label="Opacity">
+              <div style={{ ...propInputPrimary, minWidth: 0 }}>
+                <span style={iconBtn}><IconOpacity /></span>
+                <input
+                  type="number"
+                  value={Math.round(opacity)}
+                  onChange={(e) => onUpdateZoneStyle({ opacity: Math.max(0, Math.min(100, Number(e.target.value))) })}
+                  style={{ ...numInputInner, width: 0 }}
+                />
+                <span style={{ ...bodyMQuart, flexShrink: 0 }}>%</span>
+              </div>
+            </Row>
+          </div>
+        )}
+
+        <FillBorderHeader label="Fill" />
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ ...propInputPrimary, gap: 8 }}>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                flexShrink: 0,
+                background: fill,
+                border: `1px solid ${DS.borderPrimary}`,
+                borderRadius: DS.radiusSm,
+                overflow: 'hidden',
+                cursor: 'pointer',
+                position: 'relative',
+              }}
+            >
+              <input
+                type="color"
+                value={fill}
+                onChange={(e) => onUpdateZoneStyle({ fill: e.target.value })}
+                style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+              />
+            </div>
+            <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(fill)}</span>
+            <span style={{ ...bodyMQuart, flexShrink: 0 }}>{fillOpacity} %</span>
           </div>
         </div>
 
-        {rightTab === 'design' && (<>
-
-          {/* ── Appearance ─────────────────────────────────────────────────
-              Figma: Property/Grouping/Dropdown — border-top/default, px:20 py:12, gap:12
-              Content: pb:20 px:20, gap:8 between rows                                    */}
-          <SectionHeader label="Appearance" open={appearanceOpen} onToggle={() => setAppearanceOpen(!appearanceOpen)} />
-          {appearanceOpen && (
-            <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {/* Radius — Property component: bg/page, border/primary, radius/xl, pl:8 pr:14 py:8
-                  Icon button inside (24×24, p:4, radius:l) + value (Body/m-medium) */}
-              <Row label="Radius">
-                <div style={{ ...propInputPrimary, minWidth: 0 }}>
-                  <span style={iconBtn}><IconRadius /></span>
-                  <input
-                    type="number"
-                    value={Math.round(radius)}
-                    onChange={(e) => onUpdateZoneStyle({ borderRadius: Math.max(0, Number(e.target.value)) })}
-                    style={{ ...numInputInner, width: 0 }}
-                  />
-                </div>
-              </Row>
-              {/* Opacity — same structure, checkerboard icon + value + "%" unit */}
-              <Row label="Opacity">
-                <div style={{ ...propInputPrimary, minWidth: 0 }}>
-                  <span style={iconBtn}><IconOpacity /></span>
-                  <input
-                    type="number"
-                    value={Math.round(opacity)}
-                    onChange={(e) => onUpdateZoneStyle({ opacity: Math.max(0, Math.min(100, Number(e.target.value))) })}
-                    style={{ ...numInputInner, width: 0 }}
-                  />
-                  <span style={{ ...bodyMQuart, flexShrink: 0 }}>%</span>
-                </div>
-              </Row>
+        <FillBorderHeader label="Border" />
+        <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ ...propInputPrimary, gap: 8 }}>
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                flexShrink: 0,
+                background: bColor,
+                border: `1px solid ${DS.borderPrimary}`,
+                borderRadius: DS.radiusSm,
+                overflow: 'hidden',
+                cursor: 'pointer',
+                position: 'relative',
+              }}
+            >
+              <input
+                type="color"
+                value={bColor}
+                onChange={(e) => onUpdateZoneStyle({ borderColor: e.target.value })}
+                style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+              />
             </div>
-          )}
-
-          {/* ── Fill ───────────────────────────────────────────────────────
-              Figma: border-top/default, label "Fill" + eye + minus on right
-              Content: single row — color swatch (24×24 bg/secondary, border/primary, radius/sm)
-                       + hex text (Body/m-medium) + "100 %" (Body/m quaternary)             */}
-          <FillBorderHeader label="Fill" />
-          <div style={{ padding: '0 20px 20px' }}>
-            <div style={{ ...propInputPrimary, gap: 8 }}>
-              {/* Color swatch — matches Figma: bg/secondary, border, radius/sm */}
-              <div style={{
-                width: 24, height: 24, flexShrink: 0,
-                background: fill, border: `1px solid ${DS.borderPrimary}`,
-                borderRadius: DS.radiusSm, overflow: 'hidden', cursor: 'pointer', position: 'relative',
-              }}>
-                <input
-                  type="color" value={fill}
-                  onChange={(e) => onUpdateZoneStyle({ fill: e.target.value })}
-                  style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-                />
-              </div>
-              <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(fill)}</span>
-              <span style={{ ...bodyMQuart, flexShrink: 0 }}>{fillOpacity} %</span>
-            </div>
+            <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(bColor)}</span>
           </div>
 
-          {/* ── Border ─────────────────────────────────────────────────────
-              Figma: border-top/default, label "Border" + eye + minus on right
-              Row 1: color — swatch + token name "Neutral/White"
-              Row 2: Inside dropdown (Select/shadow) + border-width input (bg/page, stacked-lines icon)
-              Row 3: — Solid dropdown + □ All dropdown (both Select/shadow, equal width)     */}
-          <FillBorderHeader label="Border" />
-          <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {/* Row 1: border color */}
-            <div style={{ ...propInputPrimary, gap: 8 }}>
-              <div style={{
-                width: 24, height: 24, flexShrink: 0,
-                background: bColor, border: `1px solid ${DS.borderPrimary}`,
-                borderRadius: DS.radiusSm, overflow: 'hidden', cursor: 'pointer', position: 'relative',
-              }}>
-                <input
-                  type="color" value={bColor}
-                  onChange={(e) => onUpdateZoneStyle({ borderColor: e.target.value })}
-                  style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-                />
-              </div>
-              <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(bColor)}</span>
-            </div>
-            {/* Row 2: Inside + border width */}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <StyledSelect
-                value={bPos}
-                onChange={(e) => onUpdateZoneStyle({ borderPosition: e.target.value })}
-                options={[['inside','Inside'],['outside','Outside'],['center','Center']]}
-              />
-              {/* border-width: bg/page, border/primary, radius/xl — stacked-lines icon inside */}
-              <div style={{ ...propInputPrimary, flex: 1, background: DS.bgPage, boxShadow: 'none', gap: 8 }}>
-                <span style={iconBtn}><IconBorderWidth /></span>
-                <input
-                  type="number" value={bWidth}
-                  onChange={(e) => onUpdateZoneStyle({ borderWidth: Math.max(0, Number(e.target.value)) })}
-                  style={numInputInner}
-                />
-              </div>
-            </div>
-            {/* Row 3: — Solid + □ All */}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <StyledSelect
-                value={bStyle}
-                onChange={(e) => onUpdateZoneStyle({ borderStyle: e.target.value })}
-                options={[['solid','Solid'],['dashed','Dashed'],['dotted','Dotted']]}
-                leadingIcon={<IconMinusSm />}
-              />
-              <StyledSelect
-                value={bSides}
-                onChange={(e) => onUpdateZoneStyle({ borderSides: e.target.value })}
-                options={[['all','All'],['top','Top'],['right','Right'],['bottom','Bottom'],['left','Left']]}
-                leadingIcon={<IconSquareSm />}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <StyledSelect
+              value={bPos}
+              onChange={(e) => onUpdateZoneStyle({ borderPosition: e.target.value })}
+              options={[['inside', 'Inside'], ['outside', 'Outside'], ['center', 'Center']]}
+            />
+            <div style={{ ...propInputPrimary, flex: 1, background: DS.bgPage, boxShadow: 'none', gap: 8 }}>
+              <span style={iconBtn}><IconBorderWidth /></span>
+              <input
+                type="number"
+                value={bWidth}
+                onChange={(e) => onUpdateZoneStyle({ borderWidth: Math.max(0, Number(e.target.value)) })}
+                style={numInputInner}
               />
             </div>
           </div>
 
-          {/* ── Layers ─────────────────────────────────────────────────────
-              Figma: Property/Grouping/Dropdown — chevron-down (collapsed)                 */}
-          <SectionHeader label="Layers" open={layersOpen} onToggle={() => setLayersOpen(!layersOpen)} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <StyledSelect
+              value={bStyle}
+              onChange={(e) => onUpdateZoneStyle({ borderStyle: e.target.value })}
+              options={[['solid', 'Solid'], ['dashed', 'Dashed'], ['dotted', 'Dotted']]}
+              leadingIcon={<IconMinusSm />}
+            />
+            <StyledSelect
+              value={bSides}
+              onChange={(e) => onUpdateZoneStyle({ borderSides: e.target.value })}
+              options={[['all', 'All'], ['top', 'Top'], ['right', 'Right'], ['bottom', 'Bottom'], ['left', 'Left']]}
+              leadingIcon={<IconSquareSm />}
+            />
+          </div>
+        </div>
 
-        </>)}
-
-        {rightTab === 'presentation' && (
-          <PresentationPanel
-            presDetailsOpen={presDetailsOpen} setPresDetailsOpen={setPresDetailsOpen}
-            presName={presName} setPresName={setPresName}
-            pages={pages} setPages={setPages}
-            DS={DS} bodyM={bodyM} bodyMMedium={bodyMMedium} bodyMMedQuart={bodyMMedQuart}
-            SectionHeader={SectionHeader}
-          />
-        )}
-      </div>
+        <SectionHeader label="Layers" open={layersOpen} onToggle={() => setLayersOpen(!layersOpen)} />
+      </>
     )
   }
 
-  // ── Slide properties panel (default: no element selected) ─────────────────
+  const renderSlideDesignPanel = () => (
+    <>
+      <SectionHeader label="Dimensions" open={dimsOpen} onToggle={() => setDimsOpen(!dimsOpen)} />
+      {dimsOpen && (
+        <div style={{ padding: '0 20px 20px', display: 'flex', gap: 12 }}>
+          <div style={{ flex: 1 }}><DimInput label="W" defaultValue="1920" unit="px" /></div>
+          <div style={{ flex: 1 }}><DimInput label="H" defaultValue="1080" unit="px" /></div>
+        </div>
+      )}
+
+      <SectionHeader label="Background" open={bgOpen} onToggle={() => setBgOpen(!bgOpen)} />
+      {bgOpen && (
+        <div style={{ padding: '0 20px 20px' }}>
+          <div className="flex items-center gap-3" style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px 8px 8px' }}>
+            <input
+              type="color"
+              value={bgColor}
+              onChange={(e) => onBgColorChange(e.target.value)}
+              style={{ width: 24, height: 24, borderRadius: 4, border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
+              title={bgColor}
+            />
+            <span className="flex-1" style={{ fontSize: 14, fontWeight: 500, color: '#0A0D12' }}>
+              {bgColor.replace('#', '').toUpperCase()}
+            </span>
+            <span style={{ fontSize: 14, color: '#717680', flexShrink: 0 }}>100 %</span>
+          </div>
+        </div>
+      )}
+    </>
+  )
+
+  const renderDesignContent = () => {
+    if (selectedElement?.type === 'logo') return renderLogoDesignPanel()
+    if (selectedElement) return renderSelectedElementDesignPanel()
+    if (selectedZoneId) return renderZoneDesignPanel()
+    return renderSlideDesignPanel()
+  }
+
   return (
     <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
-      {/* Pill tabs */}
-      <div style={{ padding: '12px 20px 20px', borderBottom: '1px solid #E9EAEB' }}>
-        <div className="flex gap-2" style={{ background: '#FFFFFF', padding: 4, borderRadius: 12, border: '1px solid #E9EAEB' }}>
-          {[{ id: 'design', label: 'Design' }, { id: 'presentation', label: 'Presentation' }].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setRightTab(t.id)}
-              className="flex-1 transition-colors"
-              style={{ padding: '6px 12px', borderRadius: 8, background: rightTab === t.id ? '#F5F5F5' : 'transparent', fontSize: 14, fontWeight: rightTab === t.id ? 500 : 400, color: rightTab === t.id ? '#0A0D12' : '#717680', border: 'none', cursor: 'pointer' }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {rightTab === 'design' && (
-        <>
-          <SectionHeader label="Dimensions" open={dimsOpen} onToggle={() => setDimsOpen(!dimsOpen)} />
-          {dimsOpen && (
-            <div style={{ padding: '0 20px 20px', display: 'flex', gap: 12 }}>
-              <div style={{ flex: 1 }}><DimInput label="W" defaultValue="1920" unit="px" /></div>
-              <div style={{ flex: 1 }}><DimInput label="H" defaultValue="1080" unit="px" /></div>
-            </div>
-          )}
-
-          <SectionHeader label="Background" open={bgOpen} onToggle={() => setBgOpen(!bgOpen)} />
-          {bgOpen && (
-            <div style={{ padding: '0 20px 20px' }}>
-              <div className="flex items-center gap-3" style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px 8px 8px' }}>
-                <input
-                  type="color"
-                  value={bgColor}
-                  onChange={(e) => onBgColorChange(e.target.value)}
-                  style={{ width: 24, height: 24, borderRadius: 4, border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
-                  title={bgColor}
-                />
-                <span className="flex-1" style={{ fontSize: 14, fontWeight: 500, color: '#0A0D12' }}>
-                  {bgColor.replace('#', '').toUpperCase()}
-                </span>
-                <span style={{ fontSize: 14, color: '#717680', flexShrink: 0 }}>100 %</span>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {rightTab === 'presentation' && (
-        <PresentationPanel
-          presDetailsOpen={presDetailsOpen} setPresDetailsOpen={setPresDetailsOpen}
-          presName={presName} setPresName={setPresName}
-          pages={pages} setPages={setPages}
-          DS={DS} bodyM={bodyM} bodyMMedium={bodyMMedium} bodyMMedQuart={bodyMMedQuart}
-          SectionHeader={SectionHeader}
-        />
-      )}
+      {renderTabBar()}
+      {rightTab === 'presentation' ? renderPresentationPanel() : renderDesignContent()}
     </div>
   )
 }
