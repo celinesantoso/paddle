@@ -2652,6 +2652,8 @@ export default function EditorPage() {
   const [selectedLayout, setSelectedLayout] = useState(defaultLayout)
   const [bgColor, setBgColor] = useState('#ffffff')
   const [activeTool, setActiveTool] = useState('cursor')
+  const [pageMenuOpen, setPageMenuOpen] = useState(false)
+  const pageMenuRef = useRef(null)
 
   // ── Pages ────────────────────────────────────────────────────────────────
   const pageCounter = useRef(1)
@@ -2847,6 +2849,17 @@ export default function EditorPage() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedElementId])
 
+  useEffect(() => {
+    if (!pageMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (pageMenuRef.current && !pageMenuRef.current.contains(e.target)) {
+        setPageMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [pageMenuOpen])
+
   const panelProps = { onAddElement: handleAddElement }
 
   return (
@@ -2978,16 +2991,65 @@ export default function EditorPage() {
                   <path d="M6 12l4-4-4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              {/* Three Dots */}
-              <button
-                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="3" r="1.25" fill="#0A0D12"/>
-                  <circle cx="8" cy="8" r="1.25" fill="#0A0D12"/>
-                  <circle cx="8" cy="13" r="1.25" fill="#0A0D12"/>
-                </svg>
-              </button>
+              {/* Three Dots + Dropdown */}
+              <div ref={pageMenuRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setPageMenuOpen((o) => !o)}
+                  style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: pageMenuOpen ? '#F5F5F5' : '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="3" r="1.25" fill="#0A0D12"/>
+                    <circle cx="8" cy="8" r="1.25" fill="#0A0D12"/>
+                    <circle cx="8" cy="13" r="1.25" fill="#0A0D12"/>
+                  </svg>
+                </button>
+                {pageMenuOpen && (
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: '#FFFFFF', border: '1px solid #E9EAEB', borderRadius: 14, boxShadow: '0px 8px 24px 0px rgba(10,13,18,0.12)', padding: '8px', zIndex: 1000, minWidth: 200 }}>
+                    {/* Duplicate Page */}
+                    <button
+                      onClick={() => { setPageMenuOpen(false) }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="7" y="7" width="10" height="10" rx="2" stroke="#0A0D12" strokeWidth="1.5"/>
+                        <path d="M13 7V5a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      <span style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px', color: '#0A0D12' }}>Duplicate Page</span>
+                    </button>
+                    {/* Save as Template */}
+                    <button
+                      onClick={() => { setPageMenuOpen(false) }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="#0A0D12" strokeWidth="1.5"/>
+                        <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="#0A0D12" strokeWidth="1.5"/>
+                        <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="#0A0D12" strokeWidth="1.5"/>
+                        <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="#0A0D12" strokeWidth="1.5"/>
+                      </svg>
+                      <span style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px', color: '#0A0D12' }}>Save as Template</span>
+                    </button>
+                    {/* Divider */}
+                    <div style={{ height: 1, background: '#E9EAEB', margin: '4px 0' }} />
+                    {/* Delete Page */}
+                    <button
+                      onClick={() => { handleDeletePage(currentPageId); setPageMenuOpen(false) }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 5h14M8 5V3h4v2M6 5l1 12h6l1-12" stroke="#D92D20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px', color: '#D92D20' }}>Delete Page</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
