@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import ColorPickerModal from '../components/ColorPickerModal'
+import QRCode from 'qrcode'
 import { Link } from 'react-router-dom'
 import FreeCanvas from '../components/canvas/FreeCanvas'
 import LayoutPanel, { LAYOUT_PRESETS } from '../components/panels/LayoutPanel'
@@ -292,6 +294,15 @@ function RightPanel({
   const [layersOpen, setLayersOpen] = useState(false)
   const [presDetailsOpen, setPresDetailsOpen] = useState(true)
   const [presName, setPresName] = useState('')
+  const [colorPicker, setColorPicker] = useState({ open: false, color: '#000000', onChange: null, x: 0, y: 0 })
+
+  const openColorPicker = useCallback((color, onChange, anchorEl) => {
+    const rect = anchorEl?.getBoundingClientRect()
+    // Position to the left of the right panel (panel is 320px wide, modal is 360px wide)
+    const x = rect ? Math.max(8, rect.left - 376) : window.innerWidth - 376
+    const y = rect ? Math.min(rect.top, window.innerHeight - 600) : 100
+    setColorPicker({ open: true, color, onChange, x: Math.max(8, x), y: Math.max(8, y) })
+  }, [])
 
   const panelStyle = { width: 320, borderLeft: '1px solid #E9EAEB', background: '#FFFFFF' }
 
@@ -366,6 +377,18 @@ function RightPanel({
     color: DS.fgQuaternary,
     display: 'flex',
     alignItems: 'center',
+  }
+
+  // Clickable color swatch that opens the ColorPickerModal
+  function ColorSwatchButton({ color, onChange }) {
+    const ref = useRef(null)
+    return (
+      <div
+        ref={ref}
+        onClick={() => openColorPicker(color, onChange, ref.current)}
+        style={{ width: 24, height: 24, borderRadius: 4, background: color, border: `1px solid ${DS.borderPrimary}`, flexShrink: 0, cursor: 'pointer' }}
+      />
+    )
   }
 
   const IconRadius = () => (
@@ -917,12 +940,7 @@ function RightPanel({
             <SectionHeader label="Fill" open={true} onToggle={() => {}} />
             <div style={{ padding: '0 20px 16px' }}>
               <div className="flex items-center gap-3" style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px 8px 8px' }}>
-                <input
-                  type="color"
-                  value={el.fill || '#E9EAEB'}
-                  onChange={(e) => onUpdateElement(el.id, { fill: e.target.value })}
-                  style={{ width: 24, height: 24, borderRadius: 4, border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
-                />
+                <ColorSwatchButton color={el.fill || '#E9EAEB'} onChange={(hex) => onUpdateElement(el.id, { fill: hex })} />
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: '#0A0D12' }}>
                   {(el.fill || '#E9EAEB').replace('#', '').toUpperCase()}
                 </span>
@@ -943,12 +961,7 @@ function RightPanel({
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 12, color: '#717680', marginBottom: 6 }}>Color</div>
                 <div className="flex items-center gap-2" style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '6px 10px 6px 8px' }}>
-                  <input
-                    type="color"
-                    value={el.color || '#0A0D12'}
-                    onChange={(e) => onUpdateElement(el.id, { color: e.target.value })}
-                    style={{ width: 22, height: 22, borderRadius: 4, border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
-                  />
+                  <ColorSwatchButton color={el.color || '#0A0D12'} onChange={(hex) => onUpdateElement(el.id, { color: hex })} />
                 </div>
               </div>
             </div>
@@ -1190,9 +1203,22 @@ function RightPanel({
               style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 16, lineHeight: '24px', fontWeight: 500, color: hasUrl ? DS.fgPrimary : '#a4a7ae', fontFamily: 'inherit', minWidth: 0 }}
             />
           </div>
-          {/* Generate QR Code button — disabled state */}
+          {/* Generate QR Code button */}
           <button
             disabled={!hasUrl}
+            onClick={async () => {
+              if (!el || !qrUrl) return
+              try {
+                const dataUrl = await QRCode.toDataURL(qrUrl, {
+                  color: { dark: qrFgColor, light: qrBgColor },
+                  width: 512,
+                  margin: 1,
+                })
+                onUpdateElement(el.id, { qrDataUrl: dataUrl })
+              } catch (err) {
+                console.error('QR generation failed:', err)
+              }
+            }}
             style={{
               width: '100%',
               padding: '8px 14px',
@@ -1206,7 +1232,7 @@ function RightPanel({
               boxShadow: hasUrl ? `inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), ${DS.shadow}` : DS.shadow,
             }}
           >
-            Generate QR Code
+            {el?.qrDataUrl ? 'Update QR Code' : 'Generate QR Code'}
           </button>
         </div>
 
@@ -1214,9 +1240,7 @@ function RightPanel({
         <ColorSectionHeader label="Background Color" />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-            <div style={{ width: 24, height: 24, borderRadius: 4, background: qrBgColor, border: `1px solid ${DS.borderPrimary}`, flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-              <input type="color" value={qrBgColor} onChange={(e) => el && onUpdateElement(el.id, { qrBgColor: e.target.value })} style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
-            </div>
+            <ColorSwatchButton color={qrBgColor} onChange={(hex) => el && onUpdateElement(el.id, { qrBgColor: hex })} />
             <span style={{ flex: 1, ...bodyMMedium }}>{qrBgColor.replace('#', '#').toUpperCase()}</span>
             <span style={{ ...bodyMQuart, flexShrink: 0 }}>100 %</span>
           </div>
@@ -1226,9 +1250,7 @@ function RightPanel({
         <ColorSectionHeader label="Foreground Color" />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-            <div style={{ width: 24, height: 24, borderRadius: 4, background: qrFgColor, border: `1px solid ${DS.borderPrimary}`, flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-              <input type="color" value={qrFgColor} onChange={(e) => el && onUpdateElement(el.id, { qrFgColor: e.target.value })} style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
-            </div>
+            <ColorSwatchButton color={qrFgColor} onChange={(hex) => el && onUpdateElement(el.id, { qrFgColor: hex })} />
             <span style={{ flex: 1, ...bodyMMedium }}>{qrFgColor.replace('#', '#').toUpperCase()}</span>
             <span style={{ ...bodyMQuart, flexShrink: 0 }}>100 %</span>
           </div>
@@ -1663,26 +1685,7 @@ function RightPanel({
         <FillBorderHeader label="Fill" />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ ...propInputPrimary, gap: 8 }}>
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                flexShrink: 0,
-                background: fill,
-                border: `1px solid ${DS.borderPrimary}`,
-                borderRadius: DS.radiusSm,
-                overflow: 'hidden',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-            >
-              <input
-                type="color"
-                value={fill}
-                onChange={(e) => onUpdateZoneStyle({ fill: e.target.value })}
-                style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-              />
-            </div>
+            <ColorSwatchButton color={fill} onChange={(hex) => onUpdateZoneStyle({ fill: hex })} />
             <span style={{ flex: 1, ...bodyMMedium }}>{colorTokenName(fill)}</span>
             <span style={{ ...bodyMQuart, flexShrink: 0 }}>{fillOpacity} %</span>
           </div>
@@ -1766,13 +1769,7 @@ function RightPanel({
       {bgOpen && (
         <div style={{ padding: '0 20px 20px' }}>
           <div className="flex items-center gap-3" style={{ background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, padding: '8px 14px 8px 8px' }}>
-            <input
-              type="color"
-              value={bgColor}
-              onChange={(e) => onBgColorChange(e.target.value)}
-              style={{ width: 24, height: 24, borderRadius: 4, border: 'none', padding: 0, cursor: 'pointer', background: 'none' }}
-              title={bgColor}
-            />
+            <ColorSwatchButton color={bgColor} onChange={onBgColorChange} />
             <span className="flex-1" style={{ fontSize: 14, fontWeight: 500, color: '#0A0D12' }}>
               {bgColor.replace('#', '').toUpperCase()}
             </span>
@@ -2316,9 +2313,7 @@ function RightPanel({
         <div style={{ padding: '0 20px 20px' }}>
           {/* Fill row — node 1922:24877: bg white, skeu shadow, black swatch */}
           <div style={{ background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', boxShadow: DS.shadow }}>
-            <div style={{ width: 24, height: 24, borderRadius: 4, background: color, border: `1px solid ${DS.borderPrimary}`, flexShrink: 0, position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
-              <input type="color" value={color} onChange={(e) => onUpdateElement(el.id, { color: e.target.value })} style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }} />
-            </div>
+            <ColorSwatchButton color={color} onChange={(hex) => onUpdateElement(el.id, { color: hex })} />
             <span style={{ flex: 1, ...bodyMMedium }}>
               {color === '#000000' || color === '#0a0d12' || color === '#0A0D12' ? 'Neutral/Black' : color.replace('#', '').toUpperCase()}
             </span>
@@ -2345,10 +2340,29 @@ function RightPanel({
   }
 
   return (
-    <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
-      {renderTabBar()}
-      {rightTab === 'presentation' ? renderPresentationPanel() : renderDesignContent()}
-    </div>
+    <>
+      <div className="flex flex-col shrink-0 overflow-y-auto" style={panelStyle}>
+        {renderTabBar()}
+        {rightTab === 'presentation' ? renderPresentationPanel() : renderDesignContent()}
+      </div>
+      {colorPicker.open && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+          onMouseDown={() => setColorPicker(p => ({ ...p, open: false }))}
+        >
+          <div
+            style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y }}
+            onMouseDown={e => e.stopPropagation()}
+          >
+            <ColorPickerModal
+              initialColor={colorPicker.color}
+              onColorChange={colorPicker.onChange}
+              onClose={() => setColorPicker(p => ({ ...p, open: false }))}
+            />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -259,13 +259,17 @@ function LogoEl({ el, isSelected, onPointerDown, onResizeStart }) {
 
 function WidgetEl({ el, isSelected, onPointerDown, onResizeStart }) {
   let inner = null
-  if (el.widgetName === 'qr-code') inner = (
-    <div style={{ background: '#fff', borderRadius: 4, padding: 8, border: '1px solid #E9EAEB' }}>
-      <svg width="48" height="48" viewBox="0 0 7 7" shapeRendering="crispEdges">
-        {[[1,1,1,0,1,1,1],[1,0,1,0,1,0,1],[1,0,1,0,1,0,1],[0,0,0,0,0,0,0],[1,0,1,0,1,0,1],[1,0,1,0,1,0,1],[1,1,1,0,1,1,1]].map((row, r) =>
-          row.map((cell, c) => cell ? <rect key={`${r}-${c}`} x={c} y={r} width="1" height="1" fill="#111"/> : null)
-        )}
-      </svg>
+  if (el.widgetName === 'qr-code') inner = el.qrDataUrl ? (
+    <img
+      src={el.qrDataUrl}
+      alt="QR Code"
+      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: el.borderRadius ?? 12, display: 'block' }}
+    />
+  ) : (
+    <div style={{ width: '100%', height: '100%', background: '#fff', borderRadius: el.borderRadius ?? 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p style={{ fontFamily: "'Geist', system-ui, sans-serif", fontSize: 16, fontWeight: 400, lineHeight: '24px', color: '#0a0d12', textAlign: 'center', width: 151, margin: 0 }}>
+        Generate code using the right panel
+      </p>
     </div>
   )
   if (el.widgetName === 'youtube') inner = (
