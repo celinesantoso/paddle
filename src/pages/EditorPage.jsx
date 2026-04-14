@@ -2944,88 +2944,89 @@ export default function EditorPage() {
           className="flex-1 flex flex-col min-w-0 overflow-hidden"
           style={{ backgroundColor: '#F5F5F5' }}
         >
-          {/* ── Canvas Header ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
-            <span style={{ fontSize: 20, fontWeight: 500, lineHeight: '32px', color: '#535862', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
-              {pages.find((p) => p.id === currentPageId)?.label ?? 'Page 1'}
-            </span>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-              {/* New Page */}
-              <button
-                onClick={handleAddPage}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 3v10M3 8h10" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <span style={{ fontSize: 14, fontWeight: 600, lineHeight: '20px', color: '#0A0D12', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>New Page</span>
-              </button>
-              {/* Chevron Left */}
-              <button
-                onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx > 0) handleSelectPage(pages[idx - 1].id) }}
-                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M10 12L6 8l4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {/* Chevron Right */}
-              <button
-                onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx < pages.length - 1) handleSelectPage(pages[idx + 1].id) }}
-                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 12l4-4-4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              {/* Three Dots */}
-              <button
-                style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="3" r="1.25" fill="#0A0D12"/>
-                  <circle cx="8" cy="8" r="1.25" fill="#0A0D12"/>
-                  <circle cx="8" cy="13" r="1.25" fill="#0A0D12"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Canvas */}
+          {/* Canvas + Header (grouped so header aligns with canvas edges) */}
           <div className="flex-1 flex items-center justify-center px-6 min-h-0" onClick={handleDeselectAll}>
-            <div
-              className="shadow-lg overflow-hidden"
-              style={{
-                aspectRatio: '16/9',
-                maxWidth: '90%',
-                maxHeight: '85%',
-                width: 'min(760px, 90%)',
-                backgroundColor: bgColor,
-                outline: selectedNode?.type === 'frame' ? '2px solid #1570EF' : 'none',
-                outlineOffset: 1,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <FreeCanvas
-                elements={elements}
-                selectedId={selectedElementId}
-                editingId={editingElementId}
-                selectedZoneId={selectedZoneId}
-                zoneStyles={zoneStyles}
-                gridTracks={gridTracks}
-                gridGap={gridGap}
-                bgColor={bgColor}
-                layout={selectedLayout}
-                activeTool={activeTool}
-                onSelectElement={(id) => { setSelectedElementId(id); setEditingElementId(null); setSelectedNode(null) }}
-                onSelectFrame={handleSelectFrame}
-                onDeselectAll={handleDeselectAll}
-                onUpdateElement={handleUpdateElement}
-                onAddElement={handleAddElement}
-                onSetEditing={(id) => { setSelectedElementId(id); setEditingElementId(id) }}
-                onSelectZone={handleSelectZone}
-                onUpdateGridTracks={setGridTracks}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 'min(760px, 90%)', alignItems: 'stretch' }}>
+              {/* ── Canvas Header ── */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+                <span style={{ fontSize: 20, fontWeight: 500, lineHeight: '32px', color: '#535862', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>
+                  {pages.find((p) => p.id === currentPageId)?.label ?? 'Page 1'}
+                </span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                  {/* New Page */}
+                  <button
+                    onClick={handleAddPage}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M8 3v10M3 8h10" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    <span style={{ fontSize: 14, fontWeight: 600, lineHeight: '20px', color: '#0A0D12', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>New Page</span>
+                  </button>
+                  {/* Chevron Left */}
+                  <button
+                    onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx > 0) handleSelectPage(pages[idx - 1].id) }}
+                    style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M10 12L6 8l4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  {/* Chevron Right */}
+                  <button
+                    onClick={() => { const idx = pages.findIndex((p) => p.id === currentPageId); if (idx < pages.length - 1) handleSelectPage(pages[idx + 1].id) }}
+                    style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M6 12l4-4-4-4" stroke="#0A0D12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  {/* Three Dots */}
+                  <button
+                    style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 10, cursor: 'pointer', boxShadow: 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)' }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="3" r="1.25" fill="#0A0D12"/>
+                      <circle cx="8" cy="8" r="1.25" fill="#0A0D12"/>
+                      <circle cx="8" cy="13" r="1.25" fill="#0A0D12"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Canvas Frame ── */}
+              <div
+                className="shadow-lg overflow-hidden"
+                style={{
+                  aspectRatio: '16/9',
+                  width: '100%',
+                  backgroundColor: bgColor,
+                  outline: selectedNode?.type === 'frame' ? '2px solid #1570EF' : 'none',
+                  outlineOffset: 1,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <FreeCanvas
+                  elements={elements}
+                  selectedId={selectedElementId}
+                  editingId={editingElementId}
+                  selectedZoneId={selectedZoneId}
+                  zoneStyles={zoneStyles}
+                  gridTracks={gridTracks}
+                  gridGap={gridGap}
+                  bgColor={bgColor}
+                  layout={selectedLayout}
+                  activeTool={activeTool}
+                  onSelectElement={(id) => { setSelectedElementId(id); setEditingElementId(null); setSelectedNode(null) }}
+                  onSelectFrame={handleSelectFrame}
+                  onDeselectAll={handleDeselectAll}
+                  onUpdateElement={handleUpdateElement}
+                  onAddElement={handleAddElement}
+                  onSetEditing={(id) => { setSelectedElementId(id); setEditingElementId(id) }}
+                  onSelectZone={handleSelectZone}
+                  onUpdateGridTracks={setGridTracks}
+                />
+              </div>
             </div>
           </div>
 
