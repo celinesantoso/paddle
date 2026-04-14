@@ -2443,7 +2443,7 @@ function PageThumbnail({ pageData }) {
 
 // ─── Bottom Bar ───────────────────────────────────────────────────────────────
 
-function BottomBar({ activeTool, setActiveTool, pages, currentPageId, currentPageData, savedPageStates, onSelectPage, onAddPage }) {
+function BottomBar({ activeTool, setActiveTool, pages, currentPageId, currentPageData, savedPageStates, onSelectPage, onAddPage, onUndo, onRedo }) {
   const DS = {
     bgPrimary: '#FFFFFF',
     bgSecondary: '#F5F5F5',
@@ -2469,11 +2469,11 @@ function BottomBar({ activeTool, setActiveTool, pages, currentPageId, currentPag
     },
     { id: '_div1', divider: true },
     {
-      id: 'undo', action: true,
+      id: 'undo', action: true, onClick: onUndo,
       icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M8 12.5C8 10 10 8 13 8h3a5 5 0 010 10h-6" stroke="#717680" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M11 10l-3 2.5 3 2.5" stroke="#717680" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     {
-      id: 'redo', action: true,
+      id: 'redo', action: true, onClick: onRedo,
       icon: <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M20 12.5C20 10 18 8 15 8h-3a5 5 0 000 10h6" stroke="#717680" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M17 10l3 2.5-3 2.5" stroke="#717680" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     { id: '_div2', divider: true },
@@ -2525,7 +2525,7 @@ function BottomBar({ activeTool, setActiveTool, pages, currentPageId, currentPag
             return (
               <div key={t.id} style={{ position: 'relative', flexShrink: 0 }}>
                 <button
-                  onClick={() => !t.action && setActiveTool(t.id)}
+                  onClick={() => t.onClick ? t.onClick() : (!t.action && setActiveTool(t.id))}
                   title={t.id}
                   style={{
                     width: 40, height: 40,
@@ -2761,6 +2761,22 @@ export default function EditorPage() {
   const [editingElementId, setEditingElementId] = useState(null)
   const elementCounter = useRef(0)
 
+  // ── Undo / Redo history ──────────────────────────────────────────────────
+  const elementsRef = useRef([])
+  elementsRef.current = elements
+  const historyRef    = useRef([[]])  // stack of element snapshots; starts with empty state
+  const historyIdxRef = useRef(0)
+
+  function pushHistory(newElements) {
+    historyRef.current = historyRef.current.slice(0, historyIdxRef.current + 1)
+    historyRef.current.push(newElements.map((e) => ({ ...e })))
+    if (historyRef.current.length > 51) {
+      historyRef.current.shift()
+    } else {
+      historyIdxRef.current++
+    }
+  }
+
   // ── Zone state ───────────────────────────────────────────────────────────
   const [selectedNode, setSelectedNode] = useState(null) // { type: 'frame'|'zone', id } | null
   const [zoneStyles, setZoneStyles] = useState({})
@@ -2810,7 +2826,9 @@ export default function EditorPage() {
       ...partial,
       id: `el_${n}`,
     }
-    setElements((prev) => [...prev, el])
+    const newElements = [...elementsRef.current, el]
+    pushHistory(newElements)
+    setElements(newElements)
     setSelectedElementId(el.id)
     setEditingElementId(null)
     setActiveTool('cursor') // return to cursor after placing
@@ -2821,9 +2839,15 @@ export default function EditorPage() {
   }
 
   const handleDeleteElement = (id) => {
-    setElements((prev) => prev.filter((el) => el.id !== id))
+    const newElements = elementsRef.current.filter((el) => el.id !== id)
+    pushHistory(newElements)
+    setElements(newElements)
     setSelectedElementId(null)
     setEditingElementId(null)
+  }
+
+  const handleInteractionEnd = () => {
+    pushHistory(elementsRef.current)
   }
 
   const handleBringForward = (id) => {
@@ -2849,10 +2873,32 @@ export default function EditorPage() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      const tag = document.activeElement?.tagName
+      const isTyping = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable
+      if ((e.ctrlKey || e.metaKey) && !isTyping) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault()
+          if (historyIdxRef.current > 0) {
+            historyIdxRef.current--
+            const snapshot = historyRef.current[historyIdxRef.current]
+            setElements(snapshot)
+            setSelectedElementId((prev) => snapshot.find((el) => el.id === prev) ? prev : null)
+            setEditingElementId(null)
+          }
+          return
+        }
+        if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) {
+          e.preventDefault()
+          if (historyIdxRef.current < historyRef.current.length - 1) {
+            historyIdxRef.current++
+            setElements(historyRef.current[historyIdxRef.current])
+          }
+          return
+        }
+      }
       if (e.key !== 'Backspace' && e.key !== 'Delete') return
       // Don't fire when user is typing in an input/textarea/contenteditable
-      const tag = document.activeElement?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return
+      if (isTyping) return
       if (selectedElementId) {
         handleDeleteElement(selectedElementId)
       }
@@ -3039,6 +3085,7 @@ export default function EditorPage() {
                   onSetEditing={(id) => { setSelectedElementId(id); setEditingElementId(id) }}
                   onSelectZone={handleSelectZone}
                   onUpdateGridTracks={setGridTracks}
+                  onInteractionEnd={handleInteractionEnd}
                 />
               </div>
             </div>
@@ -3054,6 +3101,21 @@ export default function EditorPage() {
             savedPageStates={savedPageStates.current}
             onSelectPage={handleSelectPage}
             onAddPage={handleAddPage}
+            onUndo={() => {
+              if (historyIdxRef.current > 0) {
+                historyIdxRef.current--
+                const snapshot = historyRef.current[historyIdxRef.current]
+                setElements(snapshot)
+                setSelectedElementId((prev) => snapshot.find((el) => el.id === prev) ? prev : null)
+                setEditingElementId(null)
+              }
+            }}
+            onRedo={() => {
+              if (historyIdxRef.current < historyRef.current.length - 1) {
+                historyIdxRef.current++
+                setElements(historyRef.current[historyIdxRef.current])
+              }
+            }}
           />
         </div>
 

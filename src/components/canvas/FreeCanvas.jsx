@@ -308,6 +308,8 @@ export default function FreeCanvas({
   onSelectElement, onSelectFrame, onDeselectAll, onUpdateElement, onAddElement, onSetEditing,
   // Zone callbacks
   onSelectZone, onUpdateGridTracks,
+  // History
+  onInteractionEnd,
 }) {
   const canvasRef = useRef(null)
   const frameRef  = useRef(null)
@@ -482,7 +484,12 @@ export default function FreeCanvas({
     }
   }
 
-  function handlePointerUp() { ix.current = null }
+  function handlePointerUp() {
+    if (ix.current?.type === 'drag' || ix.current?.type === 'resize') {
+      onInteractionEnd?.()
+    }
+    ix.current = null
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex)
