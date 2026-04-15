@@ -316,6 +316,7 @@ export default function FreeCanvas({
   const ix = useRef(null) // current drag/resize/zone-resize interaction
   const [hoveredZoneId, setHoveredZoneId] = useState(null)
   const [frameWidth, setFrameWidth] = useState(720) // tracks rendered frame width for proportional gap
+  const [livePos, setLivePos] = useState(null) // { id, x, y[, width, height] } — local drag position, avoids parent re-renders
 
   useEffect(() => {
     const el = frameRef.current
@@ -399,6 +400,7 @@ export default function FreeCanvas({
         bUnit: bTrack.unit === 'fill' ? 'fr' : bTrack.unit, totFr, frAvail,
       }
     }
+    canvasRef.current?.setPointerCapture(e.pointerId)
     return true
   }
 
@@ -439,11 +441,13 @@ export default function FreeCanvas({
     const dx = e.clientX - (i.startX ?? 0)
     const dy = e.clientY - (i.startY ?? 0)
 
-    // Element drag
+    // Element drag — update local livePos only (no parent re-render during drag)
     if (i.type === 'drag') {
-      onUpdateElement(i.id, { x: Math.round(i.ox + dx), y: Math.round(i.oy + dy) })
+      const pos = { id: i.id, x: Math.round(i.ox + dx), y: Math.round(i.oy + dy) }
+      i.livePos = pos
+      setLivePos(pos)
 
-    // Element corner/midpoint resize
+    // Element corner/midpoint resize — same local-only update
     } else if (i.type === 'resize') {
       const { handle: h, ox, oy, ow, oh, proportional } = i
       let x = ox, y = oy, w = ow, ht = oh
@@ -462,7 +466,9 @@ export default function FreeCanvas({
         if (h.includes('w')) { x = ox + dx; w  = Math.max(32, ow - dx) }
         if (h.includes('n')) { y = oy + dy; ht = Math.max(20, oh - dy) }
       }
-      onUpdateElement(i.id, { x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(ht) })
+      const pos = { id: i.id, x: Math.round(x), y: Math.round(y), width: Math.round(w), height: Math.round(ht) }
+      i.livePos = pos
+      setLivePos(pos)
 
     // Zone column boundary resize
     } else if (i.type === 'zone-col') {
@@ -485,14 +491,23 @@ export default function FreeCanvas({
   }
 
   function handlePointerUp() {
-    if (ix.current?.type === 'drag' || ix.current?.type === 'resize') {
+    const i = ix.current
+    if (i?.type === 'drag' || i?.type === 'resize') {
+      // Commit final position to parent state once, on release
+      if (i.livePos) onUpdateElement(i.id, i.livePos)
       onInteractionEnd?.()
     }
+    setLivePos(null)
     ix.current = null
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  const sorted = [...elements].sort((a, b) => a.zIndex - b.zIndex)
+  // Apply live drag/resize position so canvas stays responsive without triggering
+  // parent re-renders on every pointermove
+  const displayElements = livePos
+    ? elements.map((el) => (el.id === livePos.id ? { ...el, ...livePos } : el))
+    : elements
+  const sorted = [...displayElements].sort((a, b) => a.zIndex - b.zIndex)
 
   function handleFramePointerDown(e) {
     if (activeTool !== 'cursor') {
@@ -508,7 +523,7 @@ export default function FreeCanvas({
       ref={canvasRef}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       style={{
         width: '100%', height: '100%',
         position: 'relative', overflow: 'hidden',
@@ -584,11 +599,13 @@ export default function FreeCanvas({
           onSelectElement(el.id)
           if (activeTool === 'cursor' && !isEditing) {
             ix.current = { type: 'drag', id: el.id, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y }
+            canvasRef.current?.setPointerCapture(e.pointerId)
           }
         }
         const onResizeStart = (e, handle) => {
           const isCorner = ['nw','ne','se','sw'].includes(handle)
           ix.current = { type: 'resize', id: el.id, handle, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y, ow: el.width, oh: el.height, proportional: el.type === 'logo' && isCorner }
+          canvasRef.current?.setPointerCapture(e.pointerId)
         }
         const onDoubleClick = () => el.type === 'text' && onSetEditing(el.id)
         const onTextBlur    = (e) => onUpdateElement(el.id, { content: e.currentTarget.innerText })

@@ -270,6 +270,136 @@ function PresentationPanel({ presDetailsOpen, setPresDetailsOpen, presName, setP
   )
 }
 
+// ─── Panel icon sub-components ─────────────────────────────────────────────────
+// Must be defined at module level — defining them inside render functions causes
+// React to treat them as new component types on every re-render, unmounting and
+// remounting their DOM (including <img> tags), which produces a visible flash.
+
+const _PANEL_SKEU = 'inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), 0px 1px 2px 0px rgba(10,13,18,0.05)'
+const _PANEL_ICON_BTN = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#717680', display: 'flex', alignItems: 'center' }
+
+function PanelAlignGroup({ icons, selectedIdx = 0 }) {
+  return (
+    <div style={{ flex: 1, display: 'flex', background: '#FAFAFA', border: '1px solid #D5D7DA', borderRadius: 10, overflow: 'hidden' }}>
+      {icons.map((src, i) => (
+        <button key={i} style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: i === selectedIdx ? '#FFFFFF' : 'transparent', border: i === selectedIdx ? '1px solid #D5D7DA' : 'none', borderRadius: i === selectedIdx ? 10 : 0, cursor: 'pointer', padding: 0, boxShadow: i === selectedIdx ? _PANEL_SKEU : 'none' }}>
+          <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: '8.33%' }}>
+              <div style={{ position: 'absolute', inset: '-3.33%' }}>
+                <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function PanelSectionDropdown({ label, chevronSrc }) {
+  return (
+    <div style={{ borderTop: '1px solid #E9EAEB', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
+      <span style={{ flex: 1, fontSize: 16, lineHeight: '24px', fontWeight: 400, color: '#0A0D12' }}>{label}</span>
+      {chevronSrc && (
+        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
+          <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
+            <div style={{ position: 'absolute', inset: '-16.67% -8.33%' }}>
+              <img alt="" src={chevronSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PanelSectionAdd({ label, plusSrc, borderBottom = false }) {
+  return (
+    <div style={{ borderTop: '1px solid #E9EAEB', borderBottom: borderBottom ? '1px solid #E9EAEB' : 'none', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
+      <span style={{ flex: 1, fontSize: 16, lineHeight: '24px', fontWeight: 400, color: '#0A0D12' }}>{label}</span>
+      {plusSrc && (
+        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
+          <div style={{ position: 'absolute', inset: '20.83%' }}>
+            <div style={{ position: 'absolute', inset: '-7.14%' }}>
+              <img alt="" src={plusSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PanelIconHeader({ label, eyeSrc, minusSrc }) {
+  return (
+    <div style={{ borderTop: '1px solid #E9EAEB', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
+      <span style={{ flex: 1, fontSize: 16, lineHeight: '24px', fontWeight: 400, color: '#0A0D12' }}>{label}</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <button style={_PANEL_ICON_BTN}>
+          <div style={{ width: 24, height: 24, position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: '20.84% 8.33%' }}>
+              <div style={{ position: 'absolute', inset: '-7.14% -5%' }}>
+                <img alt="" src={eyeSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </button>
+        <button style={_PANEL_ICON_BTN}>
+          <div style={{ width: 24, height: 24, position: 'relative' }}>
+            <div style={{ position: 'absolute', bottom: '50%', left: '20.83%', right: '20.83%', top: '50%' }}>
+              <div style={{ position: 'absolute', inset: '-1px -7.14%' }}>
+                <img alt="" src={minusSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PanelFillSectionHeader({ eyeSrc, minusSrc }) {
+  return (
+    <div style={{ borderTop: '1px solid #E9EAEB', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
+      <span style={{ flex: 1, fontSize: 16, lineHeight: '24px', fontWeight: 400, color: '#0A0D12' }}>Fill</span>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <button style={_PANEL_ICON_BTN}>
+          <div style={{ width: 24, height: 24, position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '20.84%', bottom: '20.84%', left: '8.33%', right: '8.33%' }}>
+              <div style={{ position: 'absolute', inset: '-7.14% -5%' }}>
+                <img alt="" src={eyeSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </button>
+        <button style={_PANEL_ICON_BTN}>
+          <div style={{ width: 24, height: 24, position: 'relative' }}>
+            <div style={{ position: 'absolute', bottom: '50%', left: '20.83%', right: '20.83%', top: '50%' }}>
+              <div style={{ position: 'absolute', inset: '-1px -7.14%' }}>
+                <img alt="" src={minusSrc} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PanelChevronDownImg({ src }) {
+  return (
+    <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', flexShrink: 0 }}>
+      <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
+        <div style={{ position: 'absolute', inset: '-20% -10%' }}>
+          <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function RightPanel({
   bgColor,
   onBgColorChange,
@@ -618,38 +748,7 @@ function RightPanel({
       height: 40,
     }
 
-    const skeuShadow = `inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), ${DS.shadow}`
-
-    const AlignGroup = ({ icons }) => (
-      <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl }}>
-        {icons.map((src, i) => (
-          <button
-            key={i}
-            style={{
-              flex: 1,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: i === 0 ? DS.bgPrimary : 'transparent',
-              border: i === 0 ? `1px solid ${DS.borderPrimary}` : 'none',
-              borderRadius: i === 0 ? DS.radiusXl : 0,
-              cursor: 'pointer',
-              padding: 0,
-              boxShadow: i === 0 ? skeuShadow : 'none',
-            }}
-          >
-            <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', inset: '8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-3.33%' }}>
-                  <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    )
+    const skeuShadow = skeuShadowPanel
 
     const LRow = ({ label, invisible, children }) => (
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
@@ -658,39 +757,13 @@ function RightPanel({
       </div>
     )
 
-    const ImgFillHeader = ({ label }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={bodyM}>{label}</span>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: '20.84% 8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-7.14% -5%' }}>
-                  <img alt="" src={_v10} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', bottom: '50%', left: '20.83%', right: '20.83%', top: '50%' }}>
-                <div style={{ position: 'absolute', inset: '-1px -7.14%' }}>
-                  <img alt="" src={_v11} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-    )
-
     return (
       <>
         <SectionHeader label="Position" open={true} onToggle={() => {}} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', gap: 8 }}>
-            <AlignGroup icons={[_v5, _v6, _v7]} />
-            <AlignGroup icons={[_v2, _v3, _v4]} />
+            <PanelAlignGroup icons={[_v5, _v6, _v7]} />
+            <PanelAlignGroup icons={[_v2, _v3, _v4]} />
           </div>
 
           <div style={{ display: 'flex', gap: 8 }}>
@@ -792,7 +865,7 @@ function RightPanel({
           </LRow>
         </div>
 
-        <ImgFillHeader label="Fill" />
+        <PanelIconHeader label="Fill" eyeSrc={_v10} minusSrc={_v11} />
         <div style={{ padding: '0 20px 20px' }}>
           <div
             style={{
@@ -825,7 +898,7 @@ function RightPanel({
           </button>
         </div>
 
-        <ImgFillHeader label="Drop Shadow" />
+        <PanelIconHeader label="Drop Shadow" eyeSrc={_v10} minusSrc={_v11} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <LRow label="Position">
             <div style={{ ...selIn }}>
@@ -1031,81 +1104,6 @@ function RightPanel({
       height: 40,
     }
 
-    const SectionDropdown = ({ label }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
-            <div style={{ position: 'absolute', inset: '-16.67% -8.33%' }}>
-              <img alt="" src={_chevronUp} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    const ColorSectionHeader = ({ label }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: '20.84% 8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-7.14% -5%' }}>
-                  <img alt="" src={_eyeIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', bottom: '50%', left: '20.83%', right: '20.83%', top: '50%' }}>
-                <div style={{ position: 'absolute', inset: '-1px -7.14%' }}>
-                  <img alt="" src={_minusIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-    )
-
-    const SectionAdd = ({ label }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', inset: '20.83%' }}>
-            <div style={{ position: 'absolute', inset: '-7.14%' }}>
-              <img alt="" src={_plusIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    const AlignGroup = ({ icons, selectedIdx = 0 }) => (
-      <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
-        {icons.map((src, i) => (
-          <button key={i} style={{
-            flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: i === selectedIdx ? DS.bgPrimary : 'transparent',
-            border: i === selectedIdx ? `1px solid ${DS.borderPrimary}` : 'none',
-            borderRadius: i === selectedIdx ? DS.radiusXl : 0,
-            cursor: 'pointer', padding: 0,
-            boxShadow: i === selectedIdx ? skeuShadow : 'none',
-          }}>
-            <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: '8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-3.33%' }}>
-                  <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    )
-
     const LRow = ({ label, children }) => (
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
         <span style={{ width: 70, flexShrink: 0, ...bodyMMedQuart }}>{label}</span>
@@ -1124,11 +1122,11 @@ function RightPanel({
     return (
       <>
         {/* ── Position ──────────────────────────────────────────── */}
-        <SectionDropdown label="Position" />
+        <PanelSectionDropdown label="Position" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', gap: 8 }}>
-            <AlignGroup icons={[_alignSV, _alignCV, _alignEV]} />
-            <AlignGroup icons={[_alignSH, _alignCH, _alignEH]} />
+            <PanelAlignGroup icons={[_alignSV, _alignCV, _alignEV]} />
+            <PanelAlignGroup icons={[_alignSH, _alignCH, _alignEH]} />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {[['X', el?.x ?? 0, (v) => onUpdateElement(el.id, { x: v })],
@@ -1184,7 +1182,7 @@ function RightPanel({
         </div>
 
         {/* ── QR Code ───────────────────────────────────────────── */}
-        <SectionDropdown label="QR Code" />
+        <PanelSectionDropdown label="QR Code" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* URL input */}
           <div style={{ background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
@@ -1237,7 +1235,7 @@ function RightPanel({
         </div>
 
         {/* ── Background Color ──────────────────────────────────── */}
-        <ColorSectionHeader label="Background Color" />
+        <PanelIconHeader label="Background Color" eyeSrc={_eyeIcon} minusSrc={_minusIcon} />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
             <ColorSwatchButton color={qrBgColor} onChange={(hex) => el && onUpdateElement(el.id, { qrBgColor: hex })} />
@@ -1247,7 +1245,7 @@ function RightPanel({
         </div>
 
         {/* ── Foreground Color ──────────────────────────────────── */}
-        <ColorSectionHeader label="Foreground Color" />
+        <PanelIconHeader label="Foreground Color" eyeSrc={_eyeIcon} minusSrc={_minusIcon} />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{ background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
             <ColorSwatchButton color={qrFgColor} onChange={(hex) => el && onUpdateElement(el.id, { qrFgColor: hex })} />
@@ -1257,7 +1255,7 @@ function RightPanel({
         </div>
 
         {/* ── Appearance ────────────────────────────────────────── */}
-        <SectionDropdown label="Appearance" />
+        <PanelSectionDropdown label="Appearance" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <LRow label="Radius">
             <div style={{ ...selIn }}>
@@ -1303,7 +1301,7 @@ function RightPanel({
         </div>
 
         {/* ── Drop Shadow ───────────────────────────────────────── */}
-        <SectionAdd label="Drop Shadow" />
+        <PanelSectionAdd label="Drop Shadow" plusSrc={_plusIcon} />
       </>
     )
   }
@@ -1341,72 +1339,6 @@ function RightPanel({
       overflow: 'hidden',
       height: 40,
     }
-
-    // Section header: label + chevron-up (always expanded in Figma)
-    const SectionDropdown = ({ label }) => (
-      <div style={{
-        borderTop: `1px solid var(--border-default)`,
-        display: 'flex', gap: 12, alignItems: 'center',
-        padding: '12px 20px',
-      }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
-            <div style={{ position: 'absolute', inset: '-16.67% -8.33%' }}>
-              <img alt="" src={_chevronUp} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    // Section header with + button (Border / Drop Shadow)
-    const SectionAdd = ({ label }) => (
-      <div style={{
-        borderTop: `1px solid var(--border-default)`,
-        display: 'flex', gap: 12, alignItems: 'center',
-        padding: '12px 20px',
-      }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', inset: '20.83%' }}>
-            <div style={{ position: 'absolute', inset: '-7.14%' }}>
-              <img alt="" src={_plusIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    // 3-button alignment toggle group
-    const AlignGroup = ({ icons, selectedIdx = 0 }) => (
-      <div style={{
-        flex: 1, display: 'flex',
-        background: DS.bgPage,
-        border: `1px solid ${DS.borderPrimary}`,
-        borderRadius: DS.radiusXl,
-        overflow: 'hidden',
-      }}>
-        {icons.map((src, i) => (
-          <button key={i} style={{
-            flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: i === selectedIdx ? DS.bgPrimary : 'transparent',
-            border: i === selectedIdx ? `1px solid ${DS.borderPrimary}` : 'none',
-            borderRadius: i === selectedIdx ? DS.radiusXl : 0,
-            cursor: 'pointer', padding: 0,
-            boxShadow: i === selectedIdx ? skeuShadow : 'none',
-          }}>
-            <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: '8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-3.33%' }}>
-                  <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-    )
 
     // Labeled row: "Radius" | field
     const LRow = ({ label, children }) => (
@@ -1447,13 +1379,13 @@ function RightPanel({
     return (
       <>
         {/* ── Position ─────────────────────────────────────────────── */}
-        <SectionDropdown label="Position" />
+        <PanelSectionDropdown label="Position" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           {/* Align groups row */}
           <div style={{ display: 'flex', gap: 8 }}>
-            <AlignGroup icons={[_alignSV, _alignCV, _alignEV]} />
-            <AlignGroup icons={[_alignSH, _alignCH, _alignEH]} />
+            <PanelAlignGroup icons={[_alignSV, _alignCV, _alignEV]} />
+            <PanelAlignGroup icons={[_alignSH, _alignCH, _alignEH]} />
           </div>
 
           {/* X / Y inputs */}
@@ -1529,7 +1461,7 @@ function RightPanel({
         </div>
 
         {/* ── Video Settings ────────────────────────────────────────── */}
-        <SectionDropdown label="Video Settings" />
+        <PanelSectionDropdown label="Video Settings" chevronSrc={_chevronUp} />
         <div style={{ padding: '10px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             <Checkbox checked={youtubeLoop} onChange={(v) => el && onUpdateElement(el.id, { youtubeLoop: v })} />
@@ -1542,7 +1474,7 @@ function RightPanel({
         </div>
 
         {/* ── URL ──────────────────────────────────────────────────── */}
-        <SectionDropdown label="URL" />
+        <PanelSectionDropdown label="URL" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px' }}>
           <div style={{
             background: DS.bgPage,
@@ -1575,7 +1507,7 @@ function RightPanel({
         </div>
 
         {/* ── Appearance ───────────────────────────────────────────── */}
-        <SectionDropdown label="Appearance" />
+        <PanelSectionDropdown label="Appearance" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <LRow label="Radius">
             <div style={{ ...selIn }}>
@@ -1625,7 +1557,7 @@ function RightPanel({
         </div>
 
         {/* ── Drop Shadow ──────────────────────────────────────────── */}
-        <SectionAdd label="Drop Shadow" />
+        <PanelSectionAdd label="Drop Shadow" plusSrc={_plusIcon} />
       </>
     )
   }
@@ -1832,72 +1764,6 @@ function RightPanel({
       height: 40,
     }
 
-    // Chevron-down img used in select dropdowns (20x20)
-    const ChevronDownImg = () => (
-      <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', flexShrink: 0 }}>
-        <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
-          <div style={{ position: 'absolute', inset: '-20% -10%' }}>
-            <img alt="" src={_chevronDown} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-          </div>
-        </div>
-      </div>
-    )
-
-    // Section header with chevron-up (always expanded) — matches Figma Property/Grouping/Dropdown
-    const SectionDropdown = ({ label }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', bottom: '37.5%', left: '25%', right: '25%', top: '37.5%' }}>
-            <div style={{ position: 'absolute', inset: '-16.67% -8.33%' }}>
-              <img alt="" src={_chevronUp} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    // Section header with + button (Border / Drop Shadow)
-    const SectionAdd = ({ label, borderBottom = false }) => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, borderBottom: borderBottom ? `1px solid ${DS.borderDefault}` : 'none', display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>{label}</span>
-        <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
-          <div style={{ position: 'absolute', inset: '20.83%' }}>
-            <div style={{ position: 'absolute', inset: '-7.14%' }}>
-              <img alt="" src={_plusIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-
-    // Fill section header with eye + minus — matches Figma node 1922:24875
-    const FillSectionHeader = () => (
-      <div style={{ borderTop: `1px solid ${DS.borderDefault}`, display: 'flex', gap: 12, alignItems: 'center', padding: '12px 20px' }}>
-        <span style={{ flex: 1, ...bodyM }}>Fill</span>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '20.84%', bottom: '20.84%', left: '8.33%', right: '8.33%' }}>
-                <div style={{ position: 'absolute', inset: '-7.14% -5%' }}>
-                  <img alt="" src={_eyeIcon2} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-          <button style={iconBtnFlat}>
-            <div style={{ width: 24, height: 24, position: 'relative' }}>
-              <div style={{ position: 'absolute', bottom: '50%', left: '20.83%', right: '20.83%', top: '50%' }}>
-                <div style={{ position: 'absolute', inset: '-1px -7.14%' }}>
-                  <img alt="" src={_minusFill} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
-                </div>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-    )
-
     const fontSize   = el?.fontSize   ?? 64
     const fontWeight = el?.fontWeight ?? 700
     const color      = el?.color      ?? '#000000'
@@ -1906,7 +1772,7 @@ function RightPanel({
     return (
       <>
         {/* ── Position ──────────────────────────────────────────────────────── */}
-        <SectionDropdown label="Position" />
+        <PanelSectionDropdown label="Position" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           {/* Row 1 — PropertyVerticalAlignment | PropertyHorizontalAlignment */}
@@ -2007,7 +1873,7 @@ function RightPanel({
         </div>
 
         {/* ── Appearance ────────────────────────────────────────────────────── */}
-        <SectionDropdown label="Appearance" />
+        <PanelSectionDropdown label="Appearance" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px' }}>
           {/* Opacity row — matches node 1922:24519 */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', width: '100%' }}>
@@ -2031,7 +1897,7 @@ function RightPanel({
         </div>
 
         {/* ── Typography ────────────────────────────────────────────────────── */}
-        <SectionDropdown label="Typography" />
+        <PanelSectionDropdown label="Typography" chevronSrc={_chevronUp} />
         <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           {/* Font family select — node 1922:24736 */}
@@ -2044,7 +1910,7 @@ function RightPanel({
               <option>Inter</option>
               <option>Geist</option>
             </select>
-            <ChevronDownImg />
+            <PanelChevronDownImg src={_chevronDown} />
             <div style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: skeuShadow }} />
           </div>
 
@@ -2063,7 +1929,7 @@ function RightPanel({
                 <option value={600}>Semibold</option>
                 <option value={700}>Bold</option>
               </select>
-              <ChevronDownImg />
+              <PanelChevronDownImg src={_chevronDown} />
               <div style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: skeuShadow }} />
             </div>
 
@@ -2309,7 +2175,7 @@ function RightPanel({
         </div>
 
         {/* ── Fill ──────────────────────────────────────────────────────────── */}
-        <FillSectionHeader />
+        <PanelFillSectionHeader eyeSrc={_eyeIcon2} minusSrc={_minusFill} />
         <div style={{ padding: '0 20px 20px' }}>
           {/* Fill row — node 1922:24877: bg white, skeu shadow, black swatch */}
           <div style={{ background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', boxShadow: DS.shadow }}>
@@ -2321,10 +2187,10 @@ function RightPanel({
         </div>
 
         {/* ── Border — border top AND bottom, node 1922:26111 ───────────────── */}
-        <SectionAdd label="Border" borderBottom />
+        <PanelSectionAdd label="Border" plusSrc={_plusIcon} borderBottom />
 
         {/* ── Drop Shadow — node 1921:87667 ─────────────────────────────────── */}
-        <SectionAdd label="Drop Shadow" />
+        <PanelSectionAdd label="Drop Shadow" plusSrc={_plusIcon} />
       </>
     )
   }
@@ -2371,6 +2237,7 @@ function RightPanel({
 const THUMB_W = 176
 const THUMB_H = Math.round(THUMB_W * 9 / 16) // ~99px, true 16:9
 const REF_W = 760
+const REF_H = Math.round(REF_W * 9 / 16)
 const THUMB_SCALE = THUMB_W / REF_W
 
 function buildGridTemplate(tracks) {
@@ -2383,60 +2250,169 @@ function PageThumbnail({ pageData }) {
   const { selectedLayout, gridTracks, zoneStyles = {}, elements = [], bgColor = '#ffffff' } = pageData
   const colTemplate = buildGridTemplate(gridTracks?.cols)
   const rowTemplate = buildGridTemplate(gridTracks?.rows)
-  const gap = Math.round(24 * THUMB_SCALE) // scaled gridGap
+  const gridGap = 24
 
   return (
-    <div style={{ width: THUMB_W, height: THUMB_H, overflow: 'hidden', position: 'relative', background: bgColor, borderRadius: 8, flexShrink: 0 }}>
-      {/* Zone grid */}
-      {selectedLayout && (
-        <div style={{ position: 'absolute', inset: 0, padding: gap, boxSizing: 'border-box' }}>
-          <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: colTemplate, gridTemplateRows: rowTemplate, gap }}>
-            {selectedLayout.zones.map((zone) => {
-              const zs = zoneStyles[zone.id] || {}
-              return (
-                <div key={zone.id} style={{
-                  ...zone.style,
-                  background: zs.fill ?? '#F5F5F5',
-                  borderRadius: Math.round((zs.borderRadius ?? 12) * THUMB_SCALE),
-                  border: `1px solid ${zs.borderColor ?? '#E9EAEB'}`,
-                  boxSizing: 'border-box',
-                  opacity: (zs.opacity ?? 100) / 100,
-                }} />
-              )
-            })}
-          </div>
-        </div>
-      )}
-      {/* Free-form elements */}
-      {elements.map((el) => (
-        <div key={el.id} style={{
-          position: 'absolute',
-          left: el.x * THUMB_SCALE,
-          top: el.y * THUMB_SCALE,
-          width: el.width * THUMB_SCALE,
-          height: el.height * THUMB_SCALE,
-          zIndex: el.zIndex,
-          opacity: (el.opacity ?? 100) / 100,
-          background: el.type === 'text' ? 'transparent' : (el.fill || '#D0D5DD'),
-          borderRadius: (el.borderRadius || 0) * THUMB_SCALE,
-          overflow: 'hidden',
-          pointerEvents: 'none',
-        }}>
-          {el.type === 'text' && (
-            <div style={{
-              fontSize: Math.max(4, (el.fontSize || 16) * THUMB_SCALE),
-              fontWeight: el.fontWeight || 400,
-              color: el.color || '#0A0D12',
-              lineHeight: 1.4,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              overflow: 'hidden',
-            }}>
-              {el.content}
+    <div style={{ width: THUMB_W, height: THUMB_H, overflow: 'hidden', position: 'relative', borderRadius: 8, flexShrink: 0 }}>
+      {/* Full-size inner canvas scaled down via CSS transform */}
+      <div style={{
+        position: 'absolute',
+        top: 0, left: 0,
+        width: REF_W,
+        height: REF_H,
+        background: bgColor,
+        transform: `scale(${THUMB_SCALE})`,
+        transformOrigin: 'top left',
+        pointerEvents: 'none',
+      }}>
+        {/* Zone grid at full scale */}
+        {selectedLayout && (
+          <div style={{ position: 'absolute', inset: 0, padding: gridGap, boxSizing: 'border-box' }}>
+            <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: colTemplate, gridTemplateRows: rowTemplate, gap: gridGap }}>
+              {selectedLayout.zones.map((zone) => {
+                const zs = zoneStyles[zone.id] || {}
+                return (
+                  <div key={zone.id} style={{
+                    ...zone.style,
+                    background: zs.fill ?? '#F5F5F5',
+                    borderRadius: zs.borderRadius ?? 12,
+                    border: `1px solid ${zs.borderColor ?? '#E9EAEB'}`,
+                    boxSizing: 'border-box',
+                    opacity: (zs.opacity ?? 100) / 100,
+                  }} />
+                )
+              })}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        )}
+        {/* Free-form elements at full scale */}
+        {elements.map((el) => {
+          const base = {
+            position: 'absolute',
+            left: el.x,
+            top: el.y,
+            width: el.width,
+            height: el.height,
+            zIndex: el.zIndex,
+            opacity: (el.opacity ?? 100) / 100,
+            borderRadius: el.borderRadius || 0,
+            overflow: 'hidden',
+            pointerEvents: 'none',
+          }
+          if (el.type === 'text') return (
+            <div key={el.id} style={{ ...base, background: 'transparent' }}>
+              <div style={{
+                fontSize: el.fontSize || 16,
+                fontWeight: el.fontWeight || 400,
+                color: el.color || '#0A0D12',
+                lineHeight: 1.4,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflow: 'hidden',
+              }}>{el.content}</div>
+            </div>
+          )
+          if (el.type === 'image') return (
+            <div key={el.id} style={{ ...base, background: '#F5F5F5' }}>
+              {el.src && <img src={el.src} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} alt="" />}
+            </div>
+          )
+          if (el.type === 'logo') {
+            const m = el.logoMeta || {}
+            const origW = 120, origH = 82
+            const scale = Math.min(el.width / origW, el.height / origH)
+            const tx = (el.width - origW * scale) / 2
+            const ty = (el.height - origH * scale) / 2
+            return (
+              <div key={el.id} style={{ ...base, background: m.bg || '#444CE7' }}>
+                <div style={{ position: 'absolute', left: tx, top: ty, width: origW, height: origH, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+                  {m.type === 'ipop'   && <_ThumbIpopLogo   {...m} />}
+                  {m.type === 'solar'  && <_ThumbSolarLogo  {...m} />}
+                  {m.type === 'planet' && <_ThumbPlanetLogo {...m} />}
+                </div>
+              </div>
+            )
+          }
+          if (el.type === 'widget') {
+            let inner = null
+            if (el.widgetName === 'qr-code') inner = el.qrDataUrl
+              ? <img src={el.qrDataUrl} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+              : null
+            if (el.widgetName === 'youtube') inner = (
+              <div style={{ background: '#DC2626', borderRadius: 8, width: 48, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M10 15l5.19-3L10 9v6z"/></svg>
+              </div>
+            )
+            if (el.widgetName === 'date') inner = (
+              <div style={{ background: '#fff', border: '1px solid #E9EAEB', borderRadius: 8, padding: '4px 10px' }}>
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#414651', whiteSpace: 'nowrap' }}>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+            )
+            if (el.widgetName === 'clock') inner = (
+              <div style={{ background: '#111827', borderRadius: 8, padding: '4px 10px' }}>
+                <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: '#4ADE80', letterSpacing: '0.1em' }}>00:00:00</span>
+              </div>
+            )
+            return (
+              <div key={el.id} style={{ ...base, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {inner}
+              </div>
+            )
+          }
+          // rect and other shapes
+          return <div key={el.id} style={{ ...base, background: el.fill || '#D0D5DD' }} />
+        })}
+      </div>
+    </div>
+  )
+}
+
+// Lightweight logo renderers for thumbnail (mirrors FreeCanvas logo components)
+const _ta = { position: 'absolute' }
+const _ti = { ..._ta, display: 'block', width: '100%', height: '100%', maxWidth: 'none' }
+const _tins = (t, r, b, l) => ({ ..._ta, top: t, right: r, bottom: b, left: l })
+const _tmsk = (url, size, pos) => ({
+  WebkitMaskImage: `url('${url}')`, maskImage: `url('${url}')`,
+  WebkitMaskSize: size, maskSize: size,
+  WebkitMaskPosition: pos, maskPosition: pos,
+  WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+})
+const _IPOP_MASK  = 'https://www.figma.com/api/mcp/asset/f90da30e-7c83-4a4a-ba30-09c5a7d51d39'
+const _SOLAR_MSK1 = 'https://www.figma.com/api/mcp/asset/49d57029-967f-4c2a-a8ae-c66fd16bb3ab'
+const _SOLAR_MSK2 = 'https://www.figma.com/api/mcp/asset/63d88ac1-a34b-4df0-bad7-aefc2ea6c4b6'
+const _PLNT_MSK1  = 'https://www.figma.com/api/mcp/asset/591e5752-06e2-4ce9-80e6-d1c65d084570'
+const _PLNT_MSK2  = 'https://www.figma.com/api/mcp/asset/29cc1184-bcba-4b64-b5b0-76980fb04e97'
+
+function _ThumbIpopLogo({ g1, g2, g3, maskImg, fill }) {
+  const mk = maskImg || _IPOP_MASK
+  return (
+    <div style={{ ..._ta, left: '50%', top: 'calc(50% - 0.48px)', transform: 'translate(-50%,-50%)', width: 80, height: 37.044 }}>
+      <div style={_tins('0.12%','81.71%','21.09%','-0.09%')}><div style={_tins('-5.63%','-5.63%','-5.63%','-5.63%')}><img alt="" style={_ti} src={g1} /></div></div>
+      <div style={_tins('25.03%','54.99%','0.37%','10.58%')}><div style={_tins('-5%','-5%','-5%','-5%')}><img alt="" style={_ti} src={g2} /></div></div>
+      <div style={_tins('25.03%','-0.12%','0.37%','65.69%')}><div style={_tins('-5%','-5%','-5%','-5%')}><img alt="" style={_ti} src={g3} /></div></div>
+      <div style={{ ..._tins('26.58%','29.7%','17.46%','44.39%'), ..._tmsk(mk,'20.735px 20.734px','0.008px 0.006px') }}><img alt="" style={_ti} src={fill} /></div>
+    </div>
+  )
+}
+function _ThumbSolarLogo({ fillInner, fillOuter, vector }) {
+  return (
+    <div style={{ ..._ta, left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 64, height: 64, overflow: 'hidden' }}>
+      <div style={{ ..._tins('27.65%','27.94%','27.95%','27.65%'), ..._tmsk(_SOLAR_MSK1,'28.367px 28.364px','0px 0px') }}><img alt="" style={_ti} src={fillInner} /></div>
+      <div style={{ ..._tins('0.01%','0.3%','0.3%','0.01%'), ..._tmsk(_SOLAR_MSK2,'63.82px 63.819px','-0.008px -0.004px') }}><img alt="" style={_ti} src={fillOuter} /></div>
+      <div style={_tins('20.07%','20.37%','20.37%','20.07%')}><img alt="" style={_ti} src={vector} /></div>
+    </div>
+  )
+}
+function _ThumbPlanetLogo({ fillBg, v1, v2, v3, v4, v5, fillPlanet }) {
+  return (
+    <div style={{ ..._ta, left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 90.23, height: 64, overflow: 'hidden' }}>
+      <div style={{ ..._tins('0.31%','0.41%','0.26%','0.22%'), ..._tmsk(_PLNT_MSK1,'90.09px 63.902px','-0.195px -0.182px') }}><img alt="" style={_ti} src={fillBg} /></div>
+      <div style={_tins('13.56%','45.62%','68.49%','21.36%')}><img alt="" style={_ti} src={v1} /></div>
+      <div style={_tins('68.54%','21.55%','13.52%','45.43%')}><img alt="" style={_ti} src={v2} /></div>
+      <div style={_tins('42.25%','57.31%','24.33%','16.02%')}><img alt="" style={_ti} src={v3} /></div>
+      <div style={_tins('24.27%','22.38%','24.22%','22.19%')}><img alt="" style={_ti} src={v4} /></div>
+      <div style={_tins('24.37%','16.21%','42.21%','57.12%')}><img alt="" style={_ti} src={v5} /></div>
+      <div style={{ ..._tins('24.76%','32.27%','24.99%','32.08%'), ..._tmsk(_PLNT_MSK2,'32.164px 32.161px','0px 0px') }}><img alt="" style={_ti} src={fillPlanet} /></div>
     </div>
   )
 }
