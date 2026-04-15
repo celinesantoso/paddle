@@ -36,20 +36,20 @@ export default function MediaPanel({ selectedZoneId, onInsert }) {
     <div className="flex flex-col h-full">
       {/* Search */}
       <div className="px-3 pt-3 pb-2">
-        <div className="relative">
-          <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
-            width="14" height="14" viewBox="0 0 20 20" fill="none"
-          >
-            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="2"/>
-            <path d="M15 15l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <div
+          className="flex items-center gap-3"
+          style={{ background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 8, padding: '8px 12px' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M17.5 17.5001L13.8833 13.8835M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#717680" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <input
             type="text"
             placeholder="Search media..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 bg-transparent text-base text-[#0A0D12] placeholder-[#A4A7AE] focus:outline-none"
+            style={{ fontSize: 16, lineHeight: '24px' }}
           />
         </div>
       </div>

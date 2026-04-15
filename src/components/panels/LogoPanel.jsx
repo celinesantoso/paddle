@@ -209,45 +209,28 @@ export default function LogoPanel({ onAddElement }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: DS.bgPrimary }}>
 
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-        {/* Search field */}
-        <div style={{
-          background: DS.bgPrimary,
-          border: `1px solid ${DS.borderPrimary}`,
-          borderRadius: DS.radiusL,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: '8px 12px',
-          flexShrink: 0,
-        }}>
-          <div style={{ width: 20, height: 20, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '12.5%', right: '12.5%', bottom: '12.5%', left: '12.5%' }}>
-              <div style={{ position: 'absolute', top: '-5%', right: '-5%', bottom: '-5%', left: '-5%' }}>
-                <img alt="" style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} src={imgVector8} />
-              </div>
-            </div>
-          </div>
+      {/* Search field */}
+      <div className="px-3 pt-3 pb-2">
+        <div
+          className="flex items-center gap-3"
+          style={{ background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 8, padding: '8px 12px' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+            <path d="M17.5 17.5001L13.8833 13.8835M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#717680" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <input
             type="text"
             placeholder="Search logos..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontWeight: 400,
-              fontSize: 16,
-              lineHeight: '24px',
-              color: DS.fgPrimary,
-              fontFamily: 'inherit',
-            }}
+            className="flex-1 bg-transparent text-base text-[#0A0D12] placeholder-[#A4A7AE] focus:outline-none"
+            style={{ fontSize: 16, lineHeight: '24px', fontFamily: 'inherit' }}
           />
         </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: 10, display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Color section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', flexShrink: 0 }}>

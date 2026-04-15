@@ -31,8 +31,7 @@ function QRPattern() {
 function SearchIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-      <circle cx="9.17" cy="9.17" r="5.42" stroke="var(--text-placeholder)" strokeWidth="1.5"/>
-      <path d="M13.33 13.33 16.67 16.67" stroke="var(--text-placeholder)" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M17.5 17.5001L13.8833 13.8835M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#717680" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }
@@ -268,15 +267,8 @@ export default function WidgetsPanel({ onAddElement }) {
       >
         {/* Search field */}
         <div
-          style={{
-            background: 'var(--surface-primary)',
-            border: '1px solid var(--border-primary)',
-            borderRadius: 'var(--radius-l)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-2xl)',
-            padding: '8px 12px',
-          }}
+          className="flex items-center gap-3"
+          style={{ background: '#FFFFFF', border: '1px solid #D5D7DA', borderRadius: 8, padding: '8px 12px' }}
         >
           <SearchIcon />
           <input
@@ -284,17 +276,8 @@ export default function WidgetsPanel({ onAddElement }) {
             placeholder="Search widgets..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontSize: 'var(--font-size-p3)',
-              lineHeight: 'var(--line-height-p3)',
-              fontWeight: 400,
-              color: 'var(--foreground-primary)',
-              fontFamily: 'inherit',
-            }}
+            className="flex-1 bg-transparent text-base text-[#0A0D12] placeholder-[#A4A7AE] focus:outline-none"
+            style={{ fontSize: 16, lineHeight: '24px', fontFamily: 'inherit' }}
           />
         </div>
 
