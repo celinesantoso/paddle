@@ -165,17 +165,18 @@ export default function ColorPickerModal({ initialColor = '#444CE7', onColorChan
   const hueRef    = useRef(null)
   const dragging  = useRef(null) // 'canvas' | 'hue' | null
 
+  // Refs so callbacks stay stable without stale closures
+  const hsvRef = useRef({ hue, sat, val })
+  hsvRef.current = { hue, sat, val }
+  const onColorChangeRef = useRef(onColorChange)
+  onColorChangeRef.current = onColorChange
+
   const currentHex = hsvToHex(hue, sat, val)
 
   // Keep hex input in sync when dragging
   useEffect(() => {
     setHexInput(currentHex.replace('#',''))
   }, [currentHex])
-
-  // Fire onColorChange in real-time
-  useEffect(() => {
-    onColorChange?.(currentHex)
-  }, [currentHex]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateFromCanvas = useCallback((clientX, clientY) => {
     const rect = canvasRef.current?.getBoundingClientRect()
@@ -184,6 +185,7 @@ export default function ColorPickerModal({ initialColor = '#444CE7', onColorChan
     const y = Math.max(0, Math.min(1, (clientY - rect.top)   / rect.height))
     setSat(x)
     setVal(1 - y)
+    onColorChangeRef.current?.(hsvToHex(hsvRef.current.hue, x, 1 - y))
   }, [])
 
   const updateFromHue = useCallback((clientX) => {
@@ -191,6 +193,7 @@ export default function ColorPickerModal({ initialColor = '#444CE7', onColorChan
     if (!rect) return
     const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
     setHue(x * 360)
+    onColorChangeRef.current?.(hsvToHex(x * 360, hsvRef.current.sat, hsvRef.current.val))
   }, [])
 
   useEffect(() => {
@@ -213,13 +216,14 @@ export default function ColorPickerModal({ initialColor = '#444CE7', onColorChan
     if (raw.length === 6) {
       const [h, s, v] = hexToHsv('#' + raw)
       setHue(h); setSat(s); setVal(v)
+      onColorChangeRef.current?.('#' + raw)
     }
   }
 
   const handleStyleSelect = (hex) => {
     const [h, s, v] = hexToHsv(hex)
     setHue(h); setSat(s); setVal(v)
-    onColorChange?.(hex)
+    onColorChangeRef.current?.(hex)
     onClose?.()
   }
 

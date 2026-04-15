@@ -566,11 +566,9 @@ export default function FreeCanvas({
                     pointerEvents: 'auto',
                     borderRadius: zStyle.borderRadius ?? 12,
                     opacity: (zStyle.opacity ?? 100) / 100,
-                    background: isSelected ? 'rgba(21,112,239,0.06)'
-                              : isHovered  ? 'rgba(21,112,239,0.03)'
-                              : (zStyle.fill ?? '#F5F5F5'),
+                    background: zStyle.fill ?? '#F5F5F5',
                     border: isSelected ? '2px solid #1570EF'
-                          : isHovered  ? '1px solid rgba(21,112,239,0.4)'
+                          : isHovered  ? '2px solid rgba(21,112,239,0.4)'
                           : `${zStyle.borderWidth ?? 1}px ${zStyle.borderStyle ?? 'solid'} ${zStyle.borderColor ?? '#E9EAEB'}`,
                     boxSizing: 'border-box',
                     position: 'relative',

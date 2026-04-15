@@ -416,6 +416,7 @@ function RightPanel({
   onDeletePage,
   presPageMeta,
   setPresPageMeta,
+  openColorPicker,
 }) {
   const [rightTab, setRightTab] = useState('design')
   const [dimsOpen, setDimsOpen] = useState(true)
@@ -424,15 +425,6 @@ function RightPanel({
   const [layersOpen, setLayersOpen] = useState(false)
   const [presDetailsOpen, setPresDetailsOpen] = useState(true)
   const [presName, setPresName] = useState('')
-  const [colorPicker, setColorPicker] = useState({ open: false, color: '#000000', onChange: null, x: 0, y: 0 })
-
-  const openColorPicker = useCallback((color, onChange, anchorEl) => {
-    const rect = anchorEl?.getBoundingClientRect()
-    // Position to the left of the right panel (panel is 320px wide, modal is 360px wide)
-    const x = rect ? Math.max(8, rect.left - 376) : window.innerWidth - 376
-    const y = rect ? Math.min(rect.top, window.innerHeight - 600) : 100
-    setColorPicker({ open: true, color, onChange, x: Math.max(8, x), y: Math.max(8, y) })
-  }, [])
 
   const panelStyle = { width: 320, borderLeft: '1px solid #E9EAEB', background: '#FFFFFF' }
 
@@ -2211,23 +2203,6 @@ function RightPanel({
         {renderTabBar()}
         {rightTab === 'presentation' ? renderPresentationPanel() : renderDesignContent()}
       </div>
-      {colorPicker.open && (
-        <div
-          style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
-          onMouseDown={() => setColorPicker(p => ({ ...p, open: false }))}
-        >
-          <div
-            style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y }}
-            onMouseDown={e => e.stopPropagation()}
-          >
-            <ColorPickerModal
-              initialColor={colorPicker.color}
-              onColorChange={colorPicker.onChange}
-              onClose={() => setColorPicker(p => ({ ...p, open: false }))}
-            />
-          </div>
-        </div>
-      )}
     </>
   )
 }
@@ -2731,6 +2706,18 @@ export default function EditorPage() {
     setSelectedNode(null)
   }
 
+  // ── Color picker ─────────────────────────────────────────────────────────
+  const [colorPicker, setColorPicker] = useState({ open: false, color: '#000000', x: 0, y: 0 })
+  const colorPickerCallbackRef = useRef(null)
+
+  const openColorPicker = useCallback((color, onChange, anchorEl) => {
+    const rect = anchorEl?.getBoundingClientRect()
+    const x = rect ? Math.max(8, rect.left - 376) : window.innerWidth - 376
+    const y = rect ? Math.min(rect.top, window.innerHeight - 600) : 100
+    colorPickerCallbackRef.current = onChange
+    setColorPicker({ open: true, color, x: Math.max(8, x), y: Math.max(8, y) })
+  }, [])
+
   // ── Free canvas elements ─────────────────────────────────────────────────
   const [elements, setElements] = useState([])
   const [selectedElementId, setSelectedElementId] = useState(null)
@@ -3112,9 +3099,28 @@ export default function EditorPage() {
           onDeletePage={handleDeletePage}
           presPageMeta={presPageMeta}
           setPresPageMeta={setPresPageMeta}
+          openColorPicker={openColorPicker}
         />
       </div>
 
+      {/* ── Color Picker Modal ── rendered here so onColorChange has direct access to state setters */}
+      {colorPicker.open && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+          onMouseDown={() => setColorPicker(p => ({ ...p, open: false }))}
+        >
+          <div
+            style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y }}
+            onMouseDown={e => e.stopPropagation()}
+          >
+            <ColorPickerModal
+              initialColor={colorPicker.color}
+              onColorChange={(hex) => colorPickerCallbackRef.current?.(hex)}
+              onClose={() => setColorPicker(p => ({ ...p, open: false }))}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
