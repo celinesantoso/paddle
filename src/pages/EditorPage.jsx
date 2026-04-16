@@ -91,6 +91,27 @@ const SIDEBAR_TABS = [
 const EL_TYPE_LABEL = { rect: 'Rectangle', text: 'Text', image: 'Image', logo: 'Logo', widget: 'Widget' }
 
 // Compact numeric input used throughout the right panel
+function RadiusInput({ value, onChange, style }) {
+  const [local, setLocal] = useState(String(value ?? 0))
+  useEffect(() => { setLocal(String(value ?? 0)) }, [value])
+  const commit = () => {
+    const n = parseInt(local, 10)
+    if (!isNaN(n) && n >= 0) onChange(n)
+    else setLocal(String(value ?? 0))
+  }
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={local}
+      onChange={(e) => setLocal(e.target.value.replace(/[^0-9]/g, ''))}
+      onBlur={commit}
+      onKeyDown={(e) => e.key === 'Enter' && commit()}
+      style={style}
+    />
+  )
+}
+
 function NumInput({ value, onChange, unit }) {
   return (
     <div
@@ -1106,7 +1127,7 @@ function RightPanel({
     const qrUrl    = el?.qrUrl    ?? ''
     const qrBgColor = el?.qrBgColor ?? '#FFFFFF'
     const qrFgColor = el?.qrFgColor ?? '#000000'
-    const radius   = el?.borderRadius ?? 12
+    const radius   = el?.borderRadius ?? 0
     const opacity  = el?.opacity      ?? 100
 
     const hasUrl = !!qrUrl
@@ -1202,7 +1223,7 @@ function RightPanel({
                 const dataUrl = await QRCode.toDataURL(qrUrl, {
                   color: { dark: qrFgColor, light: qrBgColor },
                   width: 512,
-                  margin: 1,
+                  margin: 4,
                 })
                 onUpdateElement(el.id, { qrDataUrl: dataUrl })
               } catch (err) {
@@ -1254,11 +1275,9 @@ function RightPanel({
               <div style={{ width: 24, height: 24, flexShrink: 0, padding: 4, borderRadius: DS.radiusL, position: 'relative' }}>
                 <img alt="" src={_sqPlay} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
               </div>
-              <input
-                type="number"
-                min={0}
-                value={Math.round(radius)}
-                onChange={(e) => el && onUpdateElement(el.id, { borderRadius: Math.max(0, Number(e.target.value)) })}
+              <RadiusInput
+                value={radius}
+                onChange={(v) => el && onUpdateElement(el.id, { borderRadius: v })}
                 style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
               />
             </div>
@@ -1365,7 +1384,7 @@ function RightPanel({
     const youtubeUrl   = el?.youtubeUrl   ?? ''
     const youtubeLoop  = el?.youtubeLoop  ?? true
     const youtubeAudio = el?.youtubeAudio ?? true
-    const radius       = el?.borderRadius ?? 12
+    const radius       = el?.borderRadius ?? 0
     const opacity      = el?.opacity      ?? 100
 
     return (
@@ -1506,11 +1525,9 @@ function RightPanel({
               <div style={{ width: 24, height: 24, flexShrink: 0, padding: 4, borderRadius: DS.radiusL, position: 'relative' }}>
                 <img alt="" src={_sqPlay} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }} />
               </div>
-              <input
-                type="number"
-                min={0}
-                value={Math.round(radius)}
-                onChange={(e) => el && onUpdateElement(el.id, { borderRadius: Math.max(0, Number(e.target.value)) })}
+              <RadiusInput
+                value={radius}
+                onChange={(v) => el && onUpdateElement(el.id, { borderRadius: v })}
                 style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
               />
             </div>
@@ -2734,7 +2751,7 @@ function PageThumbnail({ pageData }) {
           if (el.type === 'widget') {
             let inner = null
             if (el.widgetName === 'qr-code') inner = el.qrDataUrl
-              ? <img src={el.qrDataUrl} alt="QR Code" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
+              ? <img src={el.qrDataUrl} alt="QR Code" draggable={false} style={{ width: '100%', height: '100%', objectFit: 'fill', display: 'block' }} />
               : null
             if (el.widgetName === 'youtube') inner = (
               <div style={{ background: '#DC2626', borderRadius: 8, width: 48, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

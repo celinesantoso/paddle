@@ -289,10 +289,11 @@ function WidgetEl({ el, isSelected, onPointerDown, onResizeStart }) {
     <img
       src={el.qrDataUrl}
       alt="QR Code"
-      style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: el.borderRadius ?? 12, display: 'block' }}
+      draggable={false}
+      style={{ width: '100%', height: '100%', objectFit: 'fill', borderRadius: el.borderRadius ?? 0, display: 'block' }}
     />
   ) : (
-    <div style={{ width: '100%', height: '100%', background: '#fff', borderRadius: el.borderRadius ?? 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: '100%', height: '100%', background: '#fff', borderRadius: el.borderRadius ?? 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ fontFamily: "'Geist', system-ui, sans-serif", fontSize: 16, fontWeight: 400, lineHeight: '24px', color: '#0a0d12', textAlign: 'center', width: 151, margin: 0 }}>
         Generate code using the right panel
       </p>
@@ -630,8 +631,7 @@ export default function FreeCanvas({
           }
         }
         const onResizeStart = (e, handle) => {
-          const isCorner = ['nw','ne','se','sw'].includes(handle)
-          ix.current = { type: 'resize', id: el.id, handle, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y, ow: el.width, oh: el.height, proportional: el.type === 'logo' && isCorner }
+          ix.current = { type: 'resize', id: el.id, handle, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y, ow: el.width, oh: el.height, proportional: e.shiftKey }
           canvasRef.current?.setPointerCapture(e.pointerId)
         }
         const onDoubleClick = () => el.type === 'text' && onSetEditing(el.id)
