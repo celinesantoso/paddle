@@ -257,6 +257,32 @@ function LogoEl({ el, isSelected, onPointerDown, onResizeStart }) {
   )
 }
 
+function LiveClock({ fontSize, fontFamily, fontWeight, color }) {
+  const [time, setTime] = useState(() => {
+    const now = new Date()
+    return now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  })
+  useEffect(() => {
+    const id = setInterval(() => {
+      const now = new Date()
+      setTime(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span style={{
+      fontSize,
+      fontFamily,
+      fontWeight,
+      color,
+      whiteSpace: 'nowrap',
+      lineHeight: 'normal',
+    }}>
+      {time}
+    </span>
+  )
+}
+
 function WidgetEl({ el, isSelected, onPointerDown, onResizeStart }) {
   let inner = null
   if (el.widgetName === 'qr-code') inner = el.qrDataUrl ? (
@@ -283,9 +309,12 @@ function WidgetEl({ el, isSelected, onPointerDown, onResizeStart }) {
     </div>
   )
   if (el.widgetName === 'clock') inner = (
-    <div style={{ background: '#111827', borderRadius: 8, padding: '4px 10px' }}>
-      <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: '#4ADE80', letterSpacing: '0.1em' }}>00:00:00</span>
-    </div>
+    <LiveClock
+      fontSize={el.clockSize ?? 40}
+      fontFamily={el.clockFont ? `'${el.clockFont}', monospace` : "'Chivo Mono', monospace"}
+      fontWeight={el.clockWeight ?? 500}
+      color={el.clockColor ?? '#000000'}
+    />
   )
   return (
     <div style={{ ...elBase(el, isSelected), display: 'flex', alignItems: 'center', justifyContent: 'center' }} onPointerDown={onPointerDown}>

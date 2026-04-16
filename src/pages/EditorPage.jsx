@@ -2187,10 +2187,433 @@ function RightPanel({
     )
   }
 
+  const renderTimeDesignPanel = () => {
+    const el = selectedElement
+
+    // Same icon assets as renderTextDesignPanel
+    const _minus         = 'https://www.figma.com/api/mcp/asset/445df7a8-85e0-4a7d-8d9b-e2c4bf5f7d10'
+    const _listBullet    = 'https://www.figma.com/api/mcp/asset/d1c4c6fd-d3cf-4d8d-89e8-4017dcbc68b3'
+    const _listNumber    = 'https://www.figma.com/api/mcp/asset/a39bbd3d-daca-4b62-8bd8-e81c284e952a'
+    const _underline     = 'https://www.figma.com/api/mcp/asset/9eb29b12-05e5-454a-bb01-fca69f86d623'
+    const _strikethrough = 'https://www.figma.com/api/mcp/asset/e2a54736-8400-4733-b705-93da746425ae'
+    const _textVA        = 'https://www.figma.com/api/mcp/asset/8229e605-6d95-4e74-972a-feed48a57b49'
+    const _textVB        = 'https://www.figma.com/api/mcp/asset/6084dad5-1bbf-497b-bef5-f47f4a6b113b'
+    const _textVC        = 'https://www.figma.com/api/mcp/asset/40707cba-05aa-48b1-a933-2b06c828e10c'
+    const _textHLeft     = 'https://www.figma.com/api/mcp/asset/92e3d0b0-b6ae-4922-9818-2ecb4bdbbb09'
+    const _textHCenter   = 'https://www.figma.com/api/mcp/asset/41724783-006e-4e70-8398-c79d89e22286'
+    const _textHRight    = 'https://www.figma.com/api/mcp/asset/7473fac2-b7ec-47fb-95a3-2075a6fff411'
+    const _flipDiag      = 'https://www.figma.com/api/mcp/asset/682b0d54-83c4-4a8c-a9d7-338911df2932'
+    const _flipH         = 'https://www.figma.com/api/mcp/asset/8ccb1c5a-deaf-4f14-be53-fd4d14448c9a'
+    const _flipV         = 'https://www.figma.com/api/mcp/asset/8859653a-7d6a-4b43-98e7-255109f023ab'
+    const _rotateIcon    = 'https://www.figma.com/api/mcp/asset/4448b434-4c5f-4699-9802-929e3018217f'
+    const _alignSV       = 'https://www.figma.com/api/mcp/asset/5e31250a-0039-461b-89a3-c30f75cdc0eb'
+    const _alignCV       = 'https://www.figma.com/api/mcp/asset/ff8c9e61-a2bf-4789-9454-5f64fa925bbd'
+    const _alignEV       = 'https://www.figma.com/api/mcp/asset/7833d4d3-47fd-43cd-88d8-f63d321eff4d'
+    const _alignSH       = 'https://www.figma.com/api/mcp/asset/e4fb050b-7b96-4b4d-bc7a-4cae5735896d'
+    const _alignCH       = 'https://www.figma.com/api/mcp/asset/223ecf22-26c8-46ee-855c-23f8b3244c17'
+    const _alignEH       = 'https://www.figma.com/api/mcp/asset/c3524171-06c7-49a7-9733-56a679d132ab'
+    const _chevronUp     = 'https://www.figma.com/api/mcp/asset/e6365a7e-9c99-4c8f-8597-1afc88e90b8b'
+    const _scaleV18      = 'https://www.figma.com/api/mcp/asset/0c4a9718-5bdd-4f21-a4d1-d92103fb761a'
+    const _scaleV19      = 'https://www.figma.com/api/mcp/asset/3c894978-4fdc-469e-abda-17ba9d6b32f0'
+    const _scaleV20      = 'https://www.figma.com/api/mcp/asset/35a5f064-1f1a-467d-b79f-1d023e96dac2'
+    const _scaleV21      = 'https://www.figma.com/api/mcp/asset/a0e3c0ad-5f31-45c5-b2b0-043b08ee63e1'
+    const _lineHIcon     = 'https://www.figma.com/api/mcp/asset/0f608195-0adb-4d39-ac0e-7a6b88de80dc'
+    const _trackIcon     = 'https://www.figma.com/api/mcp/asset/f09ef587-b8c6-401f-89eb-0725718ba065'
+    const _eyeIcon2      = 'https://www.figma.com/api/mcp/asset/e35739bd-76b3-4944-b532-3685ad521bbd'
+    const _minusFill     = 'https://www.figma.com/api/mcp/asset/1b15ed6e-ad4f-4614-9573-54e984449c4f'
+    const _plusIcon      = 'https://www.figma.com/api/mcp/asset/4115bf0f-56d4-47c7-a6dc-cfd8273a115c'
+    const _chevronDown   = 'https://www.figma.com/api/mcp/asset/25026397-4a5e-4570-a83e-c8eaed977751'
+
+    const skeuShadow = `inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18), ${DS.shadow}`
+
+    const selIn = {
+      background: DS.bgPage,
+      border: `1px solid ${DS.borderPrimary}`,
+      borderRadius: DS.radiusXl,
+      padding: '8px 14px 8px 8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      overflow: 'hidden',
+      height: 40,
+    }
+
+    const clockFont   = el?.clockFont   ?? 'Chivo Mono'
+    const clockWeight = el?.clockWeight ?? 500
+    const clockSize   = el?.clockSize   ?? 40
+    const clockColor  = el?.clockColor  ?? '#000000'
+
+    return (
+      <>
+        {/* ── Position ──────────────────────────────────────────────────────── */}
+        <PanelSectionDropdown label="Position" chevronSrc={_chevronUp} />
+        <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* Row 1 — Vertical alignment | Horizontal alignment */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[
+              [_alignSV, _alignCV, _alignEV],
+              [_alignSH, _alignCH, _alignEH],
+            ].map((icons, gi) => (
+              <div key={gi} style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+                {icons.map((src, i) => (
+                  <button key={i} style={{
+                    flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: i === 0 ? DS.bgPrimary : 'transparent',
+                    border: i === 0 ? `1px solid ${DS.borderPrimary}` : 'none',
+                    borderRadius: i === 0 ? DS.radiusXl : 0,
+                    cursor: 'pointer', padding: 0,
+                    boxShadow: i === 0 ? skeuShadow : 'none',
+                  }}>
+                    <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: '8.33%' }}>
+                        <div style={{ position: 'absolute', inset: '-3.33%' }}>
+                          <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {/* Row 2 — X | Y inputs */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[['X', el?.x ?? 0, (v) => onUpdateElement(el.id, { x: v })],
+              ['Y', el?.y ?? 0, (v) => onUpdateElement(el.id, { y: v })]].map(([lbl, val, onChange]) => (
+              <div key={lbl} style={{ flex: 1, ...selIn }}>
+                <div style={{ width: 24, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}>
+                  <span style={{ ...bodyMQuart, fontSize: 16 }}>{lbl}</span>
+                </div>
+                <input
+                  type="number"
+                  value={Math.round(val)}
+                  onChange={(e) => onChange(Number(e.target.value))}
+                  style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Row 3 — Rotation | Flip */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, ...selIn }}>
+              <div style={{ width: 24, height: 24, flexShrink: 0, position: 'relative' }}>
+                <img alt="" src={_rotateIcon} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', maxWidth: 'none' }} />
+              </div>
+              <span style={bodyMMedium}>0°</span>
+            </div>
+            <div style={{ flex: 1, display: 'flex', background: '#F5F5F5', border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, cursor: 'pointer', padding: 0, boxShadow: skeuShadow }}>
+                <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center', left: '0.5px', top: '-1px', width: 24.455, height: 24.455 }}>
+                    <div style={{ transform: 'rotate(45deg)', flexShrink: 0 }}>
+                      <div style={{ width: 16.293, height: 18.291, position: 'relative' }}>
+                        <div style={{ position: 'absolute', inset: '-3.62% 0 0 -4.08%' }}>
+                          <img alt="" src={_flipDiag} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '8.33%', bottom: '8.33%', left: '12.5%', right: '12.5%' }}>
+                    <div style={{ position: 'absolute', inset: '-3.33% -3.69%' }}>
+                      <img alt="" src={_flipH} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '12.5%', bottom: '12.5%', left: '8.33%', right: '8.33%' }}>
+                    <div style={{ position: 'absolute', inset: '-3.69% -3.33%' }}>
+                      <img alt="" src={_flipV} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Typography ────────────────────────────────────────────────────── */}
+        <PanelSectionDropdown label="Typography" chevronSrc={_chevronUp} />
+        <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+          {/* Font family select */}
+          <div style={{ border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px', display: 'flex', alignItems: 'center', overflow: 'hidden', background: DS.bgPrimary, position: 'relative', boxShadow: skeuShadow, width: '100%' }}>
+            <div aria-hidden="true" style={{ position: 'absolute', background: DS.bgPrimary, inset: 0, borderRadius: DS.radiusXl, pointerEvents: 'none' }} />
+            <select
+              value={clockFont}
+              onChange={(e) => onUpdateElement(el.id, { clockFont: e.target.value })}
+              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, cursor: 'pointer', fontFamily: 'inherit', appearance: 'none', paddingRight: 28, minWidth: 0 }}
+            >
+              <option value="Chivo Mono">Chivo Mono</option>
+              <option value="monospace">Monospace</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Inter">Inter</option>
+              <option value="Geist">Geist</option>
+            </select>
+            <PanelChevronDownImg src={_chevronDown} />
+            <div style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: skeuShadow }} />
+          </div>
+
+          {/* Font weight | Font size */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px', display: 'flex', alignItems: 'center', overflow: 'hidden', background: DS.bgPrimary, position: 'relative', boxShadow: skeuShadow }}>
+              <div aria-hidden="true" style={{ position: 'absolute', background: DS.bgPrimary, inset: 0, borderRadius: DS.radiusXl, pointerEvents: 'none' }} />
+              <select
+                value={clockWeight}
+                onChange={(e) => onUpdateElement(el.id, { clockWeight: Number(e.target.value) })}
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, cursor: 'pointer', fontFamily: 'inherit', appearance: 'none', paddingRight: 28, minWidth: 0 }}
+              >
+                <option value={400}>Regular</option>
+                <option value={500}>Medium</option>
+                <option value={600}>Semibold</option>
+                <option value={700}>Bold</option>
+              </select>
+              <PanelChevronDownImg src={_chevronDown} />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none', boxShadow: skeuShadow }} />
+            </div>
+
+            <div style={{ flex: 1, ...selIn }}>
+              <div style={{ width: 24, height: 24, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: '4.17%', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', textAlign: 'center', color: DS.fgQuaternary, fontSize: 16, lineHeight: '24px', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  <span>A</span>
+                </div>
+                <div style={{ position: 'absolute', right: 2, top: 2, width: 6, height: 6 }}>
+                  <div style={{ position: 'absolute', inset: '-11.08%' }}>
+                    <img alt="" src={_scaleV18} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                  </div>
+                </div>
+                <div style={{ position: 'absolute', bottom: 3, right: 3, width: 4, height: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ transform: 'rotate(90deg)', flexShrink: 0 }}>
+                    <div style={{ width: 4, height: 4, position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: '-16.63%' }}>
+                        <img alt="" src={_scaleV19} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ position: 'absolute', top: 3, right: 17, width: 4, height: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ transform: 'scaleY(-1) rotate(180deg)', flexShrink: 0 }}>
+                    <div style={{ width: 4, height: 4, position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: '-16.63%' }}>
+                        <img alt="" src={_scaleV20} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ position: 'absolute', bottom: 3, right: 17, width: 4, height: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ transform: 'scaleY(-1) rotate(90deg)', flexShrink: 0 }}>
+                    <div style={{ width: 4, height: 4, position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: '-16.63%' }}>
+                        <img alt="" src={_scaleV21} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <input
+                type="number"
+                min={8}
+                value={Math.round(clockSize)}
+                onChange={(e) => onUpdateElement(el.id, { clockSize: Math.max(8, Number(e.target.value)) })}
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
+              />
+            </div>
+          </div>
+
+          {/* Line height | Letter spacing */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, ...selIn }}>
+              <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', inset: '12.5%' }}>
+                  <div style={{ position: 'absolute', inset: '-3.69%' }}>
+                    <img alt="" src={_lineHIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                  </div>
+                </div>
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '70.83%', right: '-70.83%', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', textAlign: 'center', color: DS.fgQuaternary, fontSize: 16, lineHeight: '24px', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  <span>A</span>
+                </div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', textAlign: 'center', color: DS.fgQuaternary, fontSize: 16, lineHeight: '24px', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  <span>A</span>
+                </div>
+              </div>
+              <input
+                type="number"
+                defaultValue={24}
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
+              />
+            </div>
+            <div style={{ flex: 1, ...selIn }}>
+              <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', inset: '12.5%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ transform: 'rotate(-90deg)', flexShrink: 0, width: 18, height: 18, position: 'relative' }}>
+                    <div style={{ position: 'absolute', inset: '-3.69%' }}>
+                      <img alt="" src={_trackIcon} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+                <div style={{ position: 'absolute', top: 0, bottom: 0, left: '70.83%', right: '-70.83%', display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', textAlign: 'center', color: DS.fgQuaternary, fontSize: 16, lineHeight: '24px', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  <span>A</span>
+                </div>
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 24, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden', textAlign: 'center', color: DS.fgQuaternary, fontSize: 16, lineHeight: '24px', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  <span>A</span>
+                </div>
+              </div>
+              <input
+                type="text"
+                defaultValue="0%"
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', ...bodyMMedium, minWidth: 0, fontFamily: 'inherit' }}
+              />
+            </div>
+          </div>
+
+          {/* Text align horizontal | vertical */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+              {[_textHLeft, _textHCenter, _textHRight].map((src, i) => (
+                <button key={i} style={{
+                  flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: i === 0 ? DS.bgPrimary : 'transparent',
+                  border: i === 0 ? `1px solid ${DS.borderPrimary}` : 'none',
+                  borderRadius: i === 0 ? DS.radiusXl : 0,
+                  cursor: 'pointer', padding: 0,
+                  boxShadow: i === 0 ? skeuShadow : 'none',
+                }}>
+                  <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '20.83%', bottom: '20.83%', left: '12.5%', right: '12.5%' }}>
+                      <div style={{ position: 'absolute', inset: '-5.7% -4.43%' }}>
+                        <img alt="" src={src} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, cursor: 'pointer', padding: 0, boxShadow: skeuShadow }}>
+                <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 14.097 }}>
+                    <div style={{ transform: 'scaleY(-1)', flexShrink: 0 }}>
+                      <div style={{ width: 16, height: 14.097, position: 'relative' }}>
+                        <div style={{ position: 'absolute', inset: '-4.72% -4.16%' }}>
+                          <img alt="" src={_textVA} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 16, height: 18.194 }}>
+                    <div style={{ position: 'absolute', inset: '-3.66% -4.16%' }}>
+                      <img alt="" src={_textVB} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 20, height: 20, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 16, height: 14.097 }}>
+                    <div style={{ position: 'absolute', inset: '-4.72% -4.16%' }}>
+                      <img alt="" src={_textVC} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Decoration | List style */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, cursor: 'pointer', padding: 0, boxShadow: skeuShadow }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', bottom: '50%', top: '50%', left: '20.83%', right: '20.83%' }}>
+                    <div style={{ position: 'absolute', inset: '-0.67px -4.75%' }}>
+                      <img alt="" src={_minus} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: '16.67%' }}>
+                    <div style={{ position: 'absolute', inset: '-4.16%' }}>
+                      <img alt="" src={_underline} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: '16.67%' }}>
+                    <div style={{ position: 'absolute', inset: '-4.16%' }}>
+                      <img alt="" src={_strikethrough} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+            <div style={{ flex: 1, display: 'flex', background: DS.bgPage, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, overflow: 'hidden' }}>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, cursor: 'pointer', padding: 0, boxShadow: skeuShadow }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', bottom: '50%', top: '50%', left: '20.83%', right: '20.83%' }}>
+                    <div style={{ position: 'absolute', inset: '-0.67px -4.75%' }}>
+                      <img alt="" src={_minus} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: '20.83%', bottom: '20.83%', left: '12.5%', right: '12.5%' }}>
+                    <div style={{ position: 'absolute', inset: '-4.75% -3.69%' }}>
+                      <img alt="" src={_listBullet} style={{ display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              </button>
+              <button style={{ flex: 1, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <div style={{ width: 24, height: 24, position: 'relative', flexShrink: 0 }}>
+                  <img alt="" src={_listNumber} style={{ position: 'absolute', display: 'block', width: '100%', height: '100%', maxWidth: 'none' }} />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Fill ──────────────────────────────────────────────────────────── */}
+        <PanelFillSectionHeader eyeSrc={_eyeIcon2} minusSrc={_minusFill} />
+        <div style={{ padding: '0 20px 20px' }}>
+          <div style={{ background: DS.bgPrimary, border: `1px solid ${DS.borderPrimary}`, borderRadius: DS.radiusXl, padding: '8px 14px 8px 8px', display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', boxShadow: DS.shadow }}>
+            <ColorSwatchButton color={clockColor} onChange={(hex) => onUpdateElement(el.id, { clockColor: hex })} />
+            <span style={{ flex: 1, ...bodyMMedium }}>
+              {clockColor === '#000000' || clockColor === '#0a0d12' || clockColor === '#0A0D12' ? 'Neutral/Black' : clockColor.replace('#', '').toUpperCase()}
+            </span>
+          </div>
+        </div>
+
+        {/* ── Border ────────────────────────────────────────────────────────── */}
+        <PanelSectionAdd label="Border" plusSrc={_plusIcon} borderBottom />
+
+        {/* ── Drop Shadow ───────────────────────────────────────────────────── */}
+        <PanelSectionAdd label="Drop Shadow" plusSrc={_plusIcon} />
+      </>
+    )
+  }
+
   const renderDesignContent = () => {
     if (selectedElement?.type === 'logo') return renderLogoDesignPanel()
     if (selectedElement?.type === 'widget' && selectedElement?.widgetName === 'youtube') return renderYouTubeDesignPanel()
     if (selectedElement?.type === 'widget' && selectedElement?.widgetName === 'qr-code') return renderQRCodeDesignPanel()
+    if (selectedElement?.type === 'widget' && selectedElement?.widgetName === 'clock') return renderTimeDesignPanel()
     if (selectedElement?.type === 'text') return renderTextDesignPanel()
     if (selectedElement) return renderSelectedElementDesignPanel()
     if (selectedZoneId) return renderZoneDesignPanel()
@@ -2324,9 +2747,9 @@ function PageThumbnail({ pageData }) {
               </div>
             )
             if (el.widgetName === 'clock') inner = (
-              <div style={{ background: '#111827', borderRadius: 8, padding: '4px 10px' }}>
-                <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: '#4ADE80', letterSpacing: '0.1em' }}>00:00:00</span>
-              </div>
+              <span style={{ fontSize: (el.clockSize ?? 40) * 0.275, fontFamily: el.clockFont ? `'${el.clockFont}', monospace` : "'Chivo Mono', monospace", fontWeight: el.clockWeight ?? 500, color: el.clockColor ?? '#000000', whiteSpace: 'nowrap', lineHeight: 'normal' }}>
+                {new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
             )
             return (
               <div key={el.id} style={{ ...base, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

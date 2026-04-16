@@ -332,7 +332,7 @@ export default function WidgetsPanel({ onAddElement }) {
             <WidgetCard label="Date" onClick={() => add('date', 220, 50)}>
               <DatePreview />
             </WidgetCard>
-            <WidgetCard label="Digital Clock" onClick={() => add('clock', 180, 50)}>
+            <WidgetCard label="Digital Clock" onClick={() => add('clock', 220, 60)}>
               <span
                 style={{
                   fontFamily: "'Chivo Mono', monospace",
