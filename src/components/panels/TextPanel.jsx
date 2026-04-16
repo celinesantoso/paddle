@@ -35,11 +35,9 @@ export default function TextPanel({ onAddElement }) {
         {/* Add Text Box */}
         <button
           onClick={() => onAddElement({ type: 'text', content: 'Click to edit text', fontSize: 16, fontWeight: 400, color: '#0A0D12', width: 220, height: 40 })}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 text-sm transition-colors flex items-center justify-center gap-2"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2.5 hover:bg-gray-50 transition-colors"
+          style={{ fontWeight: 600, fontSize: 16, lineHeight: '24px', color: '#0A0D12', cursor: 'pointer', fontFamily: 'inherit' }}
         >
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-            <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
           Add Text Box
         </button>
 

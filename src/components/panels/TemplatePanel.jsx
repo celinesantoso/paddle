@@ -25,24 +25,70 @@ export default function TemplatePanel({ selectedZoneId, onInsert, onSelectLayout
         </div>
       </div>
 
-      {/* Empty state */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8 text-center gap-3">
-        <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-gray-400">
-            <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-            <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-            <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-            <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-          </svg>
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-3 pb-3">
+        <div className="flex flex-col gap-4 py-2">
+          {/* Empty state */}
+          <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+            <div className="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-gray-400">
+                <rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                <rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700">No templates yet</h3>
+              <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                Save your current design as a template to use it later.
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700">No templates yet</h3>
-          <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-            Save your current design as a template to use it later.
-          </p>
-        </div>
-        <button className="border border-gray-200 text-gray-600 rounded-lg px-4 py-1.5 text-sm hover:bg-gray-50 transition-colors font-medium">
-          Save as template
+      </div>
+
+      {/* Bottom bar — matches Figma .navDropdown pattern */}
+      <div style={{
+        borderTop: '1px solid #E9EAEB',
+        padding: 12,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        background: '#FFFFFF',
+        flexShrink: 0,
+      }}>
+        <button style={{
+          width: '100%',
+          background: '#FFFFFF',
+          border: '1px solid #D5D7DA',
+          borderRadius: 10,
+          padding: '8px 14px',
+          fontWeight: 600,
+          fontSize: 16,
+          lineHeight: '24px',
+          color: '#0A0D12',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          boxShadow: '0px 1px 2px 0px rgba(10,13,18,0.05), inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18)',
+        }}>
+          Edit Templates
+        </button>
+        <button style={{
+          width: '100%',
+          background: '#1570EF',
+          border: '1px solid #175CD3',
+          borderRadius: 10,
+          padding: '8px 14px',
+          fontWeight: 600,
+          fontSize: 16,
+          lineHeight: '24px',
+          color: '#FFFFFF',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          boxShadow: '0px 1px 2px 0px rgba(10,13,18,0.05), inset 0px -2px 0px 0px rgba(10,13,18,0.05), inset 0px 0px 0px 1px rgba(10,13,18,0.18)',
+        }}>
+          Save as Template
         </button>
       </div>
     </div>
